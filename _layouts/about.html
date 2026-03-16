@@ -1,0 +1,206 @@
+---
+layout: default
+---
+
+<article class="post">
+    <header class="post-header">
+        <div class="profile-header">
+            {% if page.avatar %}
+            <img src="{{ page.avatar | relative_url }}" alt="{{ page.name }}" class="profile-avatar">
+            {% endif %}
+            <div class="profile-identity">
+                <h1 class="profile-name">{{ page.title }}</h1>
+                <ul class="profile-contact">
+                    {% if page.email %}
+                    <li>
+                        <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 7 10-7" /></svg>
+                        <a href="mailto:{{ page.email }}">{{ page.email }}</a>
+                    </li>
+                    {% endif %}
+                    {% if page.phone %}
+                    <li>
+                        <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                        {{ page.phone }}
+                    </li>
+                    {% endif %}
+                    {% if page.github %}
+                    <li>
+                        <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8" />
+                        </svg>
+                        <a href="https://github.com/{{ page.github }}" target="_blank" rel="noopener">@{{ page.github }}</a>
+                    </li>
+                    {% endif %}
+                    {% if page.linkedin %}
+                    <li>
+                        <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>
+                        <a href="https://linkedin.com/in/{{ page.linkedin }}" target="_blank" rel="noopener">{{ page.linkedin }}</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        {% if page.tagline %}
+        <p class="profile-tagline">{{ page.tagline }}</p>
+        {% endif %}
+    </header>
+
+    <div class="post-content profile-content">
+        {{ content }}
+    </div>
+</article>
+
+<style>
+    .profile-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 4px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .profile-identity {
+        flex: 1;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        border: none;
+        padding: 0;
+    }
+
+    .profile-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.25rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+        .profile-contact li {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .profile-contact .icon {
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+
+        .profile-contact a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+            .profile-contact a:hover {
+                text-decoration: underline;
+            }
+
+    .profile-tagline {
+        margin: 0.75rem 0 0 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    /* Section headings */
+    .profile-content h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        border-bottom: 2px solid #333;
+        padding-bottom: 0.25rem;
+        margin-top: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Projects and entries */
+    .profile-content .entry {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 0.25rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-content .entry-year {
+        font-size: 0.8rem;
+        color: #888;
+        padding-top: 0.15rem;
+        text-align: right;
+    }
+
+    .profile-content .entry-title {
+        font-weight: 700;
+    }
+
+    .profile-content .entry-body {
+        grid-column: 2;
+        font-size: 0.9rem;
+        line-height: 1.55;
+        color: #444;
+    }
+
+    /* Skills table */
+    .profile-content .skills-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+        .profile-content .skills-table td {
+            padding: 0.3rem 0.5rem;
+            vertical-align: top;
+        }
+
+            .profile-content .skills-table td:first-child {
+                text-align: right;
+                font-weight: 600;
+                white-space: nowrap;
+                color: #555;
+                padding-right: 1.25rem;
+                width: 120px;
+            }
+
+    @media (max-width: 600px) {
+        .profile-header {
+            flex-direction: column-reverse;
+        }
+
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+        }
+
+        .profile-contact {
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .profile-content .entry {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-content .entry-year {
+            text-align: left;
+        }
+
+        .profile-content .entry-body {
+            grid-column: 1;
+        }
+    }
+</style>

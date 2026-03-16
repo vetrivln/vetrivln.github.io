@@ -1,0 +1,67 @@
+---
+layout: default
+---
+
+<div class="home">
+
+    {{ content }}
+
+    {% capture site_lang %}{{ site.lang | default: "en" }}{% endcapture %}
+
+    <p style="padding-left: 10px; border-left: 3px solid grey; text-align: justify;
+  text-justify: inter-word; margin-bottom: 0; margin-left: 0.5em; margin-right: 1em">
+        What’s reality? I don’t know. When my bird was looking at my computer
+        monitor I thought, ‘That bird has no idea what he’s looking at.’ And
+        yet what does the bird do? Does he panic?  No, he can’t really panic,
+        he just does the best he can. Is he able to live in a world where he’s
+        so ignorant? Well, he doesn’t really have a choice. The bird is okay
+        even though he doesn’t understand the world. You’re that bird looking
+        at the monitor, and you’re thinking to yourself, ‘I can figure this
+        out.’ Maybe you have some bird ideas. Maybe that’s the best you can
+        do.
+    <p style="display: flex; justify-content: flex-end">
+        — Terry A. Davis
+    </p>
+    </p> <br /> <br/>
+
+    <ul class="post-list">
+        {% for post in paginator.posts %}
+        {% capture post_lang %}{{ post.lang | default: site_lang }}{% endcapture %}
+        {% capture lang %}{% if post_lang != site_lang %}{{ post_lang }}{% endif %}{% endcapture %}
+
+        <li{% if lang !=empty %} lang="{{ lang }}" {% endif %}>
+            <header class="post-header">
+                <h1 class="post-title">
+                    {% if post.external-url %}
+                    <a class="post-link" href="{{ post.external-url }}">{{ post.title | escape }} &rarr;</a>
+                    {% else %}
+                    <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+                    {% endif %}
+                </h1>
+
+                <p class="post-meta">
+                    {% include date.html date=post.date lang=lang %}
+                    {% if post.categories != empty or post.tags != empty %}
+                    {% include category_links.html categories=post.categories tags=post.tags %}
+                    {% endif %}
+                    {% if post.external-url %}
+                    • <a href="{{ post.url | relative_url }}">Permalink</a>
+                    {% endif %}
+                </p>
+            </header>
+
+            <div class="post-content">
+                {{ post.excerpt }}
+            </div>
+            {% if post.content contains site.excerpt_separator %}
+            <p class="post-continue">
+                <a href="{{ post.url | relative_url }}">{% include i18n.html lang=lang value="morelink" default="Read on" %} &rarr;</a>
+            </p>
+            {% endif %}
+            </li>
+            {% endfor %}
+    </ul>
+
+    {% include pagination.html %}
+
+</div>
