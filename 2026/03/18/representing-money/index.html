@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Representing Money in Writing</title>
+  <meta name="description" content="This is an excerpt from a book I was reading: [They] say that the financial value of the bauxite deposits of Orissa alone is 2.27 trillion dollars (twice India’s gross domestic product). That was at 2004 prices. At today’s prices it would be about four trillion dollars. A trillion has twelve zeroes. This raises a lot of questions: How much is 2.27 trillion in today’s prices? How much is India’s GDP now? What year was the author referring to by “At today’s prices”? This is a common pattern found in most literature. And it’s annoying enough that it’s better to assume that the reader has some sense of economics, because almost always the target audience has some grasp of the context. Is there a better way to represent a quantitative measure of money in the past in terms of some present day reference? The above example is a lot better, because it provides some scale of reference (value compared to the country’s GDP). What could be employed instead for smaller values of money?1 Is there a better way to express it than to do it through food? Even the Economist compares difference currencies through the Big Mac2. Something like: “I got a quarter, which was enough to buy a loaf of bread and a bit of meat.” “Her weekly allowance was two shillings, just enough to cover her meals and a small candle.” It would also be annoying, to be spoonfed the details of the money that’s being talked about, which is mostly why the explanation is avoided in most cases. That making sense, it is also better if there was a small section in the preface or the introduction. However we live in the 21st century and there are more modern ways to read text than on printed paper. We could make the values appear dynamic and its content depending on where the reader is from. Example pseudocode: (async function() { const readerCountry = await API.getReaderCountry(); // e.g., &quot;US&quot; const localCurrency = countryToCurrency[readerCountry] || &quot;USD&quot;; const inrElements = document.querySelectorAll(&quot;.inr&quot;); inrElements.forEach(async el =&amp;gt; { const inrAmount = parseFloat(el.textContent.replace(/[^\d.]/g,&#39;&#39;)); const exchangeRate = await API.getExchangeRate(&quot;INR&quot;, localCurrency); el.title = `≈ ${ (inrAmount / exchangeRate) } ${localCurrency}`; el.style.borderBottom = &quot;1px dotted&quot;; el.style.cursor = &quot;help&quot;; }); })(); So a reader from Europe does not have to worry about how much a thousand rupees is, since his reader gives him a context of how much that is in his local currency. Try hovering over the money mentioned: His monthly salary was about 10,000 INR And the currency with which the original amount is referenced to can be changed depending on the user’s location. What Money Really Means in Jane Austen’s Work &amp;#8617; The Economist: Big Mac Index &amp;#8617;">
+  
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2026/03/18/representing-money/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="Bird Ideas" href="http://localhost:4000/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Representing Money in Writing">
+  <meta property="og:site_name" content="Bird Ideas">
+  <meta property="og:url" content="http://localhost:4000/2026/03/18/representing-money/">
+  <meta property="og:description" content="This is an excerpt from a book I was reading: [They] say that the financial value of the bauxite deposits of Orissa alone is 2.27 trillion dollars (twice India’s gross domestic product). That was at 2004 prices. At today’s prices it would be about four trillion dollars. A trillion has twelve zeroes. This raises a lot of questions: How much is 2.27 trillion in today’s prices? How much is India’s GDP now? What year was the author referring to by “At today’s prices”? This is a common pattern found in most literature. And it’s annoying enough that it’s better to assume that the reader has some sense of economics, because almost always the target audience has some grasp of the context. Is there a better way to represent a quantitative measure of money in the past in terms of some present day reference? The above example is a lot better, because it provides some scale of reference (value compared to the country’s GDP). What could be employed instead for smaller values of money?1 Is there a better way to express it than to do it through food? Even the Economist compares difference currencies through the Big Mac2. Something like: “I got a quarter, which was enough to buy a loaf of bread and a bit of meat.” “Her weekly allowance was two shillings, just enough to cover her meals and a small candle.” It would also be annoying, to be spoonfed the details of the money that’s being talked about, which is mostly why the explanation is avoided in most cases. That making sense, it is also better if there was a small section in the preface or the introduction. However we live in the 21st century and there are more modern ways to read text than on printed paper. We could make the values appear dynamic and its content depending on where the reader is from. Example pseudocode: (async function() { const readerCountry = await API.getReaderCountry(); // e.g., &quot;US&quot; const localCurrency = countryToCurrency[readerCountry] || &quot;USD&quot;; const inrElements = document.querySelectorAll(&quot;.inr&quot;); inrElements.forEach(async el =&amp;gt; { const inrAmount = parseFloat(el.textContent.replace(/[^\d.]/g,&#39;&#39;)); const exchangeRate = await API.getExchangeRate(&quot;INR&quot;, localCurrency); el.title = `≈ ${ (inrAmount / exchangeRate) } ${localCurrency}`; el.style.borderBottom = &quot;1px dotted&quot;; el.style.cursor = &quot;help&quot;; }); })(); So a reader from Europe does not have to worry about how much a thousand rupees is, since his reader gives him a context of how much that is in his local currency. Try hovering over the money mentioned: His monthly salary was about 10,000 INR And the currency with which the original amount is referenced to can be changed depending on the user’s location. What Money Really Means in Jane Austen’s Work &amp;#8617; The Economist: Big Mac Index &amp;#8617;">
+  
+  
+  <meta name="twitter:card" content="summary">
+  
+  <meta name="twitter:title" content="Representing Money in Writing">
+  <meta name="twitter:description" content="This is an excerpt from a book I was reading: [They] say that the financial value of the bauxite deposits of Orissa alone is 2.27 trillion dollars (twice India’s gross domestic product). That was a...">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Bird Ideas</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/cv/">About</a>
+      
+        
+        <a class="page-link" href="/archives/">Archives</a>
+      
+        
+        <a class="page-link" href="https://github.com/vetrivln">GitHub</a>
+      
+        
+        <a class="page-link" href="https://remembermay2009.com">🐅</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Representing Money in Writing</h1>
+    
+    <p class="post-meta"><time datetime="2026-03-18T00:00:00+00:00" itemprop="datePublished">Mar 18, 2026</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/blog/">blog</a>
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/tags/lit/">lit</a>,
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+        <a href="/tags/languages/">languages</a>
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>This is an excerpt from a book I was reading:</p>
+
+<blockquote>
+  <p>[They] say that the financial value of the bauxite deposits of Orissa alone is
+2.27 trillion dollars (twice India’s gross domestic product). That was at 2004
+prices. At today’s prices it would be about four trillion dollars. A trillion
+has twelve zeroes.</p>
+</blockquote>
+
+<p>This raises a lot of questions: How much is 2.27 trillion in today’s prices? How
+much is India’s GDP now? What year was the author referring to by <em>“At today’s prices”</em>?</p>
+
+<p>This is a common pattern found in most literature. And it’s annoying enough that
+it’s better to assume that the reader has some sense of economics, because
+almost always the target audience has some grasp of the context.</p>
+
+<p>Is there a better way to represent a quantitative measure of money in the past
+in terms of some present day reference?</p>
+
+<p>The above example is a lot better, because it provides some scale of reference
+(value compared to the country’s GDP).</p>
+
+<p>What could be employed instead for smaller values of money?<sup id="fnref:note"><a href="#fn:note" class="footnote" rel="footnote" role="doc-noteref">1</a></sup> Is there a
+better way to express it than to do it through food? Even the Economist compares
+difference currencies through the Big Mac<sup id="fnref:bigmacindex"><a href="#fn:bigmacindex" class="footnote" rel="footnote" role="doc-noteref">2</a></sup>. Something like:</p>
+
+<blockquote>
+  <p>“I got a quarter, which was enough to buy a loaf of bread and a bit of meat.”</p>
+</blockquote>
+
+<blockquote>
+  <p>“Her weekly allowance was two shillings, just enough to cover her meals and a small candle.”</p>
+</blockquote>
+
+<p>It would also be annoying, to be spoonfed the details of the money that’s being
+talked about, which is mostly why the explanation is avoided in most cases. That
+making sense, it is also better if there was a small section in the preface or
+the introduction.</p>
+
+<p>However we live in the 21st century and there are more modern ways to read text
+than on printed paper. We could make the values appear dynamic and its content
+depending on where the reader is from. Example pseudocode:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="k">async</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">readerCountry</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">API</span><span class="p">.</span><span class="nf">getReaderCountry</span><span class="p">();</span> <span class="c1">// e.g., "US"</span>
+    <span class="kd">const</span> <span class="nx">localCurrency</span> <span class="o">=</span> <span class="nx">countryToCurrency</span><span class="p">[</span><span class="nx">readerCountry</span><span class="p">]</span> <span class="o">||</span> <span class="dl">"</span><span class="s2">USD</span><span class="dl">"</span><span class="p">;</span>
+
+    <span class="kd">const</span> <span class="nx">inrElements</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">querySelectorAll</span><span class="p">(</span><span class="dl">"</span><span class="s2">.inr</span><span class="dl">"</span><span class="p">);</span>
+
+    <span class="nx">inrElements</span><span class="p">.</span><span class="nf">forEach</span><span class="p">(</span><span class="k">async</span> <span class="nx">el</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">inrAmount</span> <span class="o">=</span> <span class="nf">parseFloat</span><span class="p">(</span><span class="nx">el</span><span class="p">.</span><span class="nx">textContent</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sr">/</span><span class="se">[^\d</span><span class="sr">.</span><span class="se">]</span><span class="sr">/g</span><span class="p">,</span><span class="dl">''</span><span class="p">));</span>
+        <span class="kd">const</span> <span class="nx">exchangeRate</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">API</span><span class="p">.</span><span class="nf">getExchangeRate</span><span class="p">(</span><span class="dl">"</span><span class="s2">INR</span><span class="dl">"</span><span class="p">,</span> <span class="nx">localCurrency</span><span class="p">);</span>
+        <span class="nx">el</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="s2">`≈ </span><span class="p">${</span> <span class="p">(</span><span class="nx">inrAmount</span> <span class="o">/</span> <span class="nx">exchangeRate</span><span class="p">)</span> <span class="p">}</span><span class="s2"> </span><span class="p">${</span><span class="nx">localCurrency</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+        <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">borderBottom</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">1px dotted</span><span class="dl">"</span><span class="p">;</span>
+        <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">cursor</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">help</span><span class="dl">"</span><span class="p">;</span>
+    <span class="p">});</span>
+<span class="p">})();</span>
+</code></pre></div></div>
+
+<p>So a reader from Europe does not have to worry about how much a thousand rupees
+is, since his reader gives him a context of how much that is in his local
+currency. Try hovering over the money mentioned:</p>
+
+<blockquote>
+  <p>His monthly salary was about <span id="inr-to-eur" title="Loading..." style="border-bottom: 1px dotted; cursor: help;">10,000 INR</span></p>
+</blockquote>
+
+<p>And the currency with which the original amount is referenced to can be changed
+depending on the user’s location.</p>
+
+<script>
+fetch('https://latest.currency-api.pages.dev/v1/currencies/eur.json')
+  .then(r=>r.json())
+  .then(d=>{
+    const e=(10000/d.eur.inr).toFixed(2),
+          f=new Date().toLocaleString('en-US',{month:'short',day:'numeric'});
+    document.getElementById('inr-to-eur').title=`about €${e} as of ${f}`;
+  })
+  .catch(_=>document.getElementById('inr-to-eur').title='Error fetching data');
+</script>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:note">
+      <p><a href="https://lithub.com/what-money-really-means-in-jane-austens-work/">What Money Really Means in Jane Austen’s Work</a> <a href="#fnref:note" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:bigmacindex">
+      <p><a href="https://www.economist.com/interactive/big-mac-index" title="The Big Mac index is based on the theory of purchasing-power parity (PPP), the notion that in the long run exchange rates should move towards the rate that would equalise the prices of an identical basket of goods and services (in this case, a burger) in any two countries.">The Economist: Big Mac Index</a> <a href="#fnref:bigmacindex" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+  </div>
+
+  
+
+    
+
+
+  
+    
+      
+        
+        
+  
+
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+    
+  
+
+  
+    
+      
+    
+  
+
+  
+    
+      
+    
+  
+
+  
+    
+      
+    
+  
+
+
+
+
+
+
+<section class="also-read">
+  <h2>Also Read:</h2>
+  <ul>
+    
+      <li><a href="/2026/03/19/xteink-x4-tamil/">Tamil support for the Xteink X4 reader</a></li>
+    
+      <li><a href="/2026/03/18/another-emacs/">Will there be another Emacs?</a></li>
+    
+      <li><a href="/2026/02/09/knowing-a-language/">When do you actually 'know' a language?</a></li>
+    
+  </ul>
+</section>
+
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; <a rel="license" href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0</a><br />
+~vetrivln
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
