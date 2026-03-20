@@ -233,7 +233,7 @@ pre > code {
 /**
  * Site footer
  */
-.site-footer {
+.site-footer p {
   padding: 30px 0;
   font-size: 15px;
   color: #757575;
