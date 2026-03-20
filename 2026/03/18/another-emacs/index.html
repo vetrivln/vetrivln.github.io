@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Will there be another Emacs?</title>
+  <meta name="description" content="If you had spoken with me at least once, chances are that you would’ve heard of a ‘Emacs’.1 On surface it looks like a text editor, but beneath it is a full layer of an Lisp Interpreter. It may not appear impressive until you realise what it actually means: You are given the freedom to modify the very environment that you currently use. This means that you could inspect and override every single function and modify the core behaviour at runtime, without the need to ‘restart’ or compile it again. And Lisp (not to be confused with LISP) languages are very intuitive that anyone can start hacking on it. That was the case for me too, when I was 14. It was the best way for me to get into programming and the enthusiasm I had back then still lives on. My .emacs.d directory has now exceeded over 10k SLOC: ~ ❯ sloc --format=summary ~/.emacs.d/*.el ~/.emacs.d/lisp/*.el ~/.emacs.d/site-lisp/chizu/*.el │ Language │ Files │ % │ Code │ % │ Comment │ % │ ├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤ │ EmacsLisp │ 46 │ 98.2 │ 10122 │ 60.6 │ 2051 │ 12.3 │ │ Markdown │ 1 │ 1.8 │ 0 │ 0.0 │ 128 │ 35.8 │ ├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤ │ Sum │ 47 │ 100.0 │ 10122 │ 59.3 │ 2179 │ 12.8 │ └─────────────┴───────┴───────┴───────┴──────┴─────────┴──────┘ This is excluding the hundreds of community packages I’ve installed, almost all of which comes from other users like me. So many useful packages that you couldn’t have imagined yourself: magit, yasnippet, and much more. It may not be impressive in the era of fancy IDEs and LLMs that do the job for you, but that totally misses the point: it is not about what it does, more about how it does things that would’ve otherwise been tedious and frustruating. This blog used to be ran on a handwritten static-site generator before I switched to Jekyll later. I was so impressed that the program even worked, given how inexperienced in programming I was back then. That didn’t matter however, as long as it just worked: (defun add-entries-to-archive () (with-current-buffer (find-file-noselect &quot;/home/vetrivln/Downloads/public_html/archives.html&quot;) (goto-char (point-min)) (search-forward-regexp &quot;&amp;lt;ul&amp;gt;&quot;) (delete-region (point) (- (search-forward-regexp &quot;&amp;lt;/ul&amp;gt;&quot;) 6)) (goto-char (- (point) 6)) (dolist (file (reverse (directory-files &quot;~/Downloads/public_html/articles/&quot; t &quot;^[^_].*.org$&quot; nil))) (let ((date (substring file 42 52)) (file-name (substring file 42 -4)) (title (progn (with-current-buffer (find-file-noselect file) (goto-char (point-min)) (buffer-substring-no-properties 10 (line-end-position)))))) (insert (format &quot;\n&amp;lt;li&amp;gt;&amp;lt;div class=\&quot;date\&quot;&amp;gt;%s&amp;amp;emsp;&amp;amp;emsp;&amp;lt;/div&amp;gt;&amp;lt;a href=\&quot;articles/%s.html\&quot;&amp;gt;&amp;lt;div class=\&quot;title\&quot;&amp;gt;%s&amp;lt;/div&amp;gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;\n&quot; date file-name title)) (search-forward-regexp &quot;&amp;lt;/ul&amp;gt;&quot;) (goto-char (- (point) 6)) (save-buffer))))) In hindsight this was not the best way to do it, but that does not matter. Here’s another function that I wrote for an EPUB reading mode, to select one from the many words displayed, query the internet for its meaning and return only the definition from the page retrieved: (defun find-dict-meaning (word) &quot;Query Merriam Webster for the definition of WORD.&quot; (interactive (list (cond ((use-region-p) (buffer-substring-no-properties (region-beginning) (region-end))) (current-prefix-arg (or (thing-at-point &#39;word t) ;(read-string &quot;word: &quot; (thing-at-point &#39;word t))) (error &quot;No word to query&quot;)) ((save-window-excursion (call-interactively #&#39;avy-goto-word-1) (thing-at-point &#39;symbol t)))))) (url-retrieve (concat &quot;https://www.merriam-webster.com/dictionary/&quot; (url-hexify-string word)) (lambda (status) (unwind-protect nil (progn (when-let (err (plist-get status :error)) (user-error &quot;Failed to query Merriam Webster: %S %s&quot; err word)) (goto-char (point-min)) (forward-paragraph) ;skip the HTTP header (let* ((dom (libxml-parse-html-region (point) (point-max))) (text (dom-strings (dom-by-class dom &quot;dtText&quot;)))) (setq text (mapconcat #&#39;(lambda (text) (propertize text &#39;face &#39;italic)) (nbutlast (cl-remove-duplicates (append text &#39;(&quot;: &quot;)) :test &#39;string=)) &quot; or &quot;)) (message &quot;%s: %s&quot; word (string-clean-whitespace text)))) (kill-buffer))))) My .emacs.d directory is a graveyard of hundred other procedures, that once served a purpose and strangely reminds me of a time, when I did not have possesion of the many tools that are now available at my disposal, but had a curiousity and enthusiasm of a much stronger magnitude that what I currently possess. It feels wrong to be nostalgic about something as living as Emacs: surely there should be an active community right now as there was back then. There’s no way I’d know that right now, especially when I haven’t logged in on IRC for years now. Emacs Homepage &amp;#8617;">
+  
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2026/03/18/another-emacs/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="Bird Ideas" href="http://localhost:4000/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Will there be another Emacs?">
+  <meta property="og:site_name" content="Bird Ideas">
+  <meta property="og:url" content="http://localhost:4000/2026/03/18/another-emacs/">
+  <meta property="og:description" content="If you had spoken with me at least once, chances are that you would’ve heard of a ‘Emacs’.1 On surface it looks like a text editor, but beneath it is a full layer of an Lisp Interpreter. It may not appear impressive until you realise what it actually means: You are given the freedom to modify the very environment that you currently use. This means that you could inspect and override every single function and modify the core behaviour at runtime, without the need to ‘restart’ or compile it again. And Lisp (not to be confused with LISP) languages are very intuitive that anyone can start hacking on it. That was the case for me too, when I was 14. It was the best way for me to get into programming and the enthusiasm I had back then still lives on. My .emacs.d directory has now exceeded over 10k SLOC: ~ ❯ sloc --format=summary ~/.emacs.d/*.el ~/.emacs.d/lisp/*.el ~/.emacs.d/site-lisp/chizu/*.el │ Language │ Files │ % │ Code │ % │ Comment │ % │ ├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤ │ EmacsLisp │ 46 │ 98.2 │ 10122 │ 60.6 │ 2051 │ 12.3 │ │ Markdown │ 1 │ 1.8 │ 0 │ 0.0 │ 128 │ 35.8 │ ├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤ │ Sum │ 47 │ 100.0 │ 10122 │ 59.3 │ 2179 │ 12.8 │ └─────────────┴───────┴───────┴───────┴──────┴─────────┴──────┘ This is excluding the hundreds of community packages I’ve installed, almost all of which comes from other users like me. So many useful packages that you couldn’t have imagined yourself: magit, yasnippet, and much more. It may not be impressive in the era of fancy IDEs and LLMs that do the job for you, but that totally misses the point: it is not about what it does, more about how it does things that would’ve otherwise been tedious and frustruating. This blog used to be ran on a handwritten static-site generator before I switched to Jekyll later. I was so impressed that the program even worked, given how inexperienced in programming I was back then. That didn’t matter however, as long as it just worked: (defun add-entries-to-archive () (with-current-buffer (find-file-noselect &quot;/home/vetrivln/Downloads/public_html/archives.html&quot;) (goto-char (point-min)) (search-forward-regexp &quot;&amp;lt;ul&amp;gt;&quot;) (delete-region (point) (- (search-forward-regexp &quot;&amp;lt;/ul&amp;gt;&quot;) 6)) (goto-char (- (point) 6)) (dolist (file (reverse (directory-files &quot;~/Downloads/public_html/articles/&quot; t &quot;^[^_].*.org$&quot; nil))) (let ((date (substring file 42 52)) (file-name (substring file 42 -4)) (title (progn (with-current-buffer (find-file-noselect file) (goto-char (point-min)) (buffer-substring-no-properties 10 (line-end-position)))))) (insert (format &quot;\n&amp;lt;li&amp;gt;&amp;lt;div class=\&quot;date\&quot;&amp;gt;%s&amp;amp;emsp;&amp;amp;emsp;&amp;lt;/div&amp;gt;&amp;lt;a href=\&quot;articles/%s.html\&quot;&amp;gt;&amp;lt;div class=\&quot;title\&quot;&amp;gt;%s&amp;lt;/div&amp;gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;\n&quot; date file-name title)) (search-forward-regexp &quot;&amp;lt;/ul&amp;gt;&quot;) (goto-char (- (point) 6)) (save-buffer))))) In hindsight this was not the best way to do it, but that does not matter. Here’s another function that I wrote for an EPUB reading mode, to select one from the many words displayed, query the internet for its meaning and return only the definition from the page retrieved: (defun find-dict-meaning (word) &quot;Query Merriam Webster for the definition of WORD.&quot; (interactive (list (cond ((use-region-p) (buffer-substring-no-properties (region-beginning) (region-end))) (current-prefix-arg (or (thing-at-point &#39;word t) ;(read-string &quot;word: &quot; (thing-at-point &#39;word t))) (error &quot;No word to query&quot;)) ((save-window-excursion (call-interactively #&#39;avy-goto-word-1) (thing-at-point &#39;symbol t)))))) (url-retrieve (concat &quot;https://www.merriam-webster.com/dictionary/&quot; (url-hexify-string word)) (lambda (status) (unwind-protect nil (progn (when-let (err (plist-get status :error)) (user-error &quot;Failed to query Merriam Webster: %S %s&quot; err word)) (goto-char (point-min)) (forward-paragraph) ;skip the HTTP header (let* ((dom (libxml-parse-html-region (point) (point-max))) (text (dom-strings (dom-by-class dom &quot;dtText&quot;)))) (setq text (mapconcat #&#39;(lambda (text) (propertize text &#39;face &#39;italic)) (nbutlast (cl-remove-duplicates (append text &#39;(&quot;: &quot;)) :test &#39;string=)) &quot; or &quot;)) (message &quot;%s: %s&quot; word (string-clean-whitespace text)))) (kill-buffer))))) My .emacs.d directory is a graveyard of hundred other procedures, that once served a purpose and strangely reminds me of a time, when I did not have possesion of the many tools that are now available at my disposal, but had a curiousity and enthusiasm of a much stronger magnitude that what I currently possess. It feels wrong to be nostalgic about something as living as Emacs: surely there should be an active community right now as there was back then. There’s no way I’d know that right now, especially when I haven’t logged in on IRC for years now. Emacs Homepage &amp;#8617;">
+  
+  
+  <meta name="twitter:card" content="summary">
+  
+  <meta name="twitter:title" content="Will there be another Emacs?">
+  <meta name="twitter:description" content="If you had spoken with me at least once, chances are that you would’ve heard of a ‘Emacs’.1 On surface it looks like a text editor, but beneath it is a full layer of an Lisp Interpreter. It may not...">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Bird Ideas</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/cv/">About</a>
+      
+        
+        <a class="page-link" href="/archives/">Archives</a>
+      
+        
+        <a class="page-link" href="https://github.com/vetrivln">GitHub</a>
+      
+        
+        <a class="page-link" href="https://remembermay2009.com">🐅</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Will there be another Emacs?</h1>
+    
+    <p class="post-meta"><time datetime="2026-03-18T00:00:00+00:00" itemprop="datePublished">Mar 18, 2026</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/blog/">blog</a>
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+        <a href="/tags/tech/">tech</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>If you had spoken with me at least once, chances are that you would’ve heard of a
+‘Emacs’.<sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup></p>
+
+<p>On surface it looks like a text editor, but beneath it is a full layer of an
+Lisp Interpreter. It may not appear impressive until you realise what it
+actually means:</p>
+
+<p>You are given the freedom to modify the very environment that
+you currently use. This means that you could inspect and override every single function and modify
+the core behaviour at runtime, without the need to ‘restart’ or compile it again.</p>
+
+<p>And Lisp (not to be confused with LISP) languages are very intuitive that anyone
+can start hacking on it. That was the case for me too, when I was 14. It was the
+best way for me to get into programming and the enthusiasm I had back then still
+lives on.</p>
+
+<p>My <code class="language-plaintext highlighter-rouge">.emacs.d</code> directory has now exceeded over 10k SLOC:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~ 
+❯ sloc --format=summary ~/.emacs.d/*.el ~/.emacs.d/lisp/*.el ~/.emacs.d/site-lisp/chizu/*.el     
+
+│ Language    │ Files │     % │  Code │    % │ Comment │    % │
+├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤
+│ EmacsLisp   │    46 │  98.2 │ 10122 │ 60.6 │    2051 │ 12.3 │
+│ Markdown    │     1 │   1.8 │     0 │  0.0 │     128 │ 35.8 │
+├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤
+│ Sum         │    47 │ 100.0 │ 10122 │ 59.3 │    2179 │ 12.8 │
+└─────────────┴───────┴───────┴───────┴──────┴─────────┴──────┘
+</code></pre></div></div>
+
+<p>This is excluding the hundreds of community packages I’ve installed, almost all
+of which comes from other users like me. So many useful packages that you
+couldn’t have imagined yourself: <a href="https://magit.vc/">magit</a>,
+<a href="https://github.com/joaotavora/yasnippet">yasnippet</a>, and much more.</p>
+
+<p>It may not be impressive in the era of fancy IDEs and LLMs that do the job for
+you, but that totally misses the point: it is not about <em>what</em> it does, more
+about <em>how</em> it does things that would’ve otherwise been tedious and
+frustruating.</p>
+
+<p>This blog used to be ran on a handwritten static-site generator before I
+switched to Jekyll later. I was so impressed that the program even worked, given
+how inexperienced in programming I was back then. That didn’t matter however, as
+long as it <em>just worked</em>:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">add-entries-to-archive</span> <span class="p">()</span>
+  <span class="p">(</span><span class="nv">with-current-buffer</span> <span class="p">(</span><span class="nv">find-file-noselect</span> <span class="s">"/home/vetrivln/Downloads/public_html/archives.html"</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nv">point-min</span><span class="p">))</span>
+    <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="s">"&lt;ul&gt;"</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">delete-region</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="s">"&lt;/ul&gt;"</span><span class="p">)</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="p">(</span><span class="nb">dolist</span> <span class="p">(</span><span class="nv">file</span> <span class="p">(</span><span class="nb">reverse</span> <span class="p">(</span><span class="nv">directory-files</span> <span class="s">"~/Downloads/public_html/articles/"</span> <span class="no">t</span> <span class="s">"^[^_].*.org$"</span> <span class="no">nil</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">date</span> <span class="p">(</span><span class="nv">substring</span> <span class="nv">file</span> <span class="mi">42</span> <span class="mi">52</span><span class="p">))</span>
+            <span class="p">(</span><span class="nv">file-name</span> <span class="p">(</span><span class="nv">substring</span> <span class="nv">file</span> <span class="mi">42</span> <span class="mi">-4</span><span class="p">))</span>
+            <span class="p">(</span><span class="nv">title</span> <span class="p">(</span><span class="k">progn</span>
+                     <span class="p">(</span><span class="nv">with-current-buffer</span> <span class="p">(</span><span class="nv">find-file-noselect</span> <span class="nv">file</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nv">point-min</span><span class="p">))</span>
+                       <span class="p">(</span><span class="nv">buffer-substring-no-properties</span> <span class="mi">10</span> <span class="p">(</span><span class="nv">line-end-position</span><span class="p">))))))</span>
+        <span class="p">(</span><span class="nv">insert</span> <span class="p">(</span><span class="nb">format</span> <span class="s">"\n&lt;li&gt;&lt;div class=\"date\"&gt;%s&amp;emsp;&amp;emsp;&lt;/div&gt;&lt;a href=\"articles/%s.html\"&gt;&lt;div class=\"title\"&gt;%s&lt;/div&gt;&lt;/a&gt;&lt;/li&gt;\n"</span> <span class="nv">date</span> <span class="nv">file-name</span> <span class="nv">title</span><span class="p">))</span>
+        <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="s">"&lt;/ul&gt;"</span><span class="p">)</span>
+        <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="p">(</span><span class="nv">save-buffer</span><span class="p">)))))</span>
+</code></pre></div></div>
+
+<p>In hindsight this was not the best way to do it, but that does not matter.</p>
+
+<p>Here’s another function that I wrote for an EPUB reading mode, to select one
+from the many words displayed, query the internet for its meaning and return
+only the definition from the page retrieved:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">find-dict-meaning</span> <span class="p">(</span><span class="nv">word</span><span class="p">)</span>
+  <span class="s">"Query Merriam Webster for the definition of WORD."</span>
+  <span class="p">(</span><span class="nv">interactive</span>
+   <span class="p">(</span><span class="nb">list</span>
+    <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">use-region-p</span><span class="p">)</span>
+	       <span class="p">(</span><span class="nv">buffer-substring-no-properties</span> <span class="p">(</span><span class="nv">region-beginning</span><span class="p">)</span> <span class="p">(</span><span class="nv">region-end</span><span class="p">)))</span>
+          <span class="p">(</span><span class="nv">current-prefix-arg</span>
+           <span class="p">(</span><span class="nb">or</span> <span class="p">(</span><span class="nv">thing-at-point</span> <span class="ss">'word</span> <span class="no">t</span><span class="p">)</span> <span class="c1">;(read-string "word:  " (thing-at-point 'word t)))</span>
+               <span class="p">(</span><span class="nb">error</span> <span class="s">"No word to query"</span><span class="p">))</span>
+	      <span class="p">((</span><span class="nv">save-window-excursion</span>
+             <span class="p">(</span><span class="nv">call-interactively</span> <span class="nf">#'</span><span class="nv">avy-goto-word-1</span><span class="p">)</span>
+             <span class="p">(</span><span class="nv">thing-at-point</span> <span class="ss">'symbol</span> <span class="no">t</span><span class="p">))))))</span>
+  <span class="p">(</span><span class="nv">url-retrieve</span>
+   <span class="p">(</span><span class="nv">concat</span> <span class="s">"https://www.merriam-webster.com/dictionary/"</span>
+	       <span class="p">(</span><span class="nv">url-hexify-string</span> <span class="nv">word</span><span class="p">))</span>
+   <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nv">status</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">unwind-protect</span> <span class="no">nil</span>
+       <span class="p">(</span><span class="k">progn</span>
+	     <span class="p">(</span><span class="nv">when-let</span> <span class="p">(</span><span class="nv">err</span> <span class="p">(</span><span class="nv">plist-get</span> <span class="nv">status</span> <span class="ss">:error</span><span class="p">))</span>
+	       <span class="p">(</span><span class="nv">user-error</span> <span class="s">"Failed to query Merriam Webster: %S %s"</span> <span class="nv">err</span> <span class="nv">word</span><span class="p">))</span>
+	     <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nv">point-min</span><span class="p">))</span>
+	     <span class="p">(</span><span class="nv">forward-paragraph</span><span class="p">)</span>		<span class="c1">;skip the HTTP header</span>
+	     <span class="p">(</span><span class="k">let*</span> <span class="p">((</span><span class="nv">dom</span> <span class="p">(</span><span class="nv">libxml-parse-html-region</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="p">(</span><span class="nv">point-max</span><span class="p">)))</span>
+		        <span class="p">(</span><span class="nv">text</span> <span class="p">(</span><span class="nv">dom-strings</span> <span class="p">(</span><span class="nv">dom-by-class</span> <span class="nv">dom</span> <span class="s">"dtText"</span><span class="p">))))</span>
+           <span class="p">(</span><span class="k">setq</span> <span class="nv">text</span> <span class="p">(</span><span class="nv">mapconcat</span> <span class="nf">#'</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nv">text</span><span class="p">)</span> <span class="p">(</span><span class="nv">propertize</span> <span class="nv">text</span> <span class="ss">'face</span> <span class="ss">'italic</span><span class="p">))</span>
+                                 <span class="p">(</span><span class="nb">nbutlast</span> <span class="p">(</span><span class="nv">cl-remove-duplicates</span> <span class="p">(</span><span class="nb">append</span> <span class="nv">text</span> <span class="o">'</span><span class="p">(</span><span class="s">": "</span><span class="p">))</span> <span class="ss">:test</span> <span class="ss">'string=</span><span class="p">))</span>
+                                 <span class="s">" or "</span><span class="p">))</span>
+	       <span class="p">(</span><span class="nv">message</span> <span class="s">"%s: %s"</span> <span class="nv">word</span> <span class="p">(</span><span class="nv">string-clean-whitespace</span> <span class="nv">text</span><span class="p">))))</span>
+       <span class="p">(</span><span class="nv">kill-buffer</span><span class="p">)))))</span>
+</code></pre></div></div>
+
+<p>My <code class="language-plaintext highlighter-rouge">.emacs.d</code> directory is a graveyard of hundred other procedures, that once
+served a purpose and strangely reminds me of a time, when I did not have
+possesion of the many tools that are now available at my disposal, but had a
+curiousity and enthusiasm of a much stronger magnitude that what I currently
+possess.</p>
+
+<p>It feels wrong to be nostalgic about something as living as Emacs: surely there
+should be an active community right now as there was back then. There’s no way
+I’d know that right now, especially when I haven’t logged in on IRC for years now.</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1">
+      <p><a href="https://gnu.org/software/emacs/">Emacs Homepage</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; <a rel="license" href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0</a><br />
+~vetrivln
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

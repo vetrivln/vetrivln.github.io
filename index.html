@@ -14,17 +14,17 @@
   
 
   <link rel="stylesheet" href="/assets/main.css">
-  <link rel="canonical" href="https://vetrivln.github.io/">
+  <link rel="canonical" href="http://localhost:4000/">
   
   
-  <link rel="alternate" type="application/rss+xml" title="Bird Ideas" href="https://vetrivln.github.io/feed.xml">
+  <link rel="alternate" type="application/rss+xml" title="Bird Ideas" href="http://localhost:4000/feed.xml">
 
   
 
   
   <meta property="og:title" content="Bird Ideas">
   <meta property="og:site_name" content="Bird Ideas">
-  <meta property="og:url" content="https://vetrivln.github.io/">
+  <meta property="og:url" content="http://localhost:4000/">
   <meta property="og:description" content="Minimal, responsive Jekyll theme for hackers.">
   
   
@@ -99,6 +99,366 @@
 
     <ul class="post-list">
         
+        
+        
+
+        <li>
+            <header class="post-header">
+                <h1 class="post-title">
+                    
+                    <a class="post-link" href="/2026/03/19/xteink-x4-tamil/">Tamil support for the Xteink X4 reader</a>
+                    
+                </h1>
+
+                <p class="post-meta">
+                    Mar 19, 2026
+                    
+                     •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/blog/">blog</a>
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+        <a href="/tags/tech/">tech</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+
+                    
+                    
+                </p>
+            </header>
+
+            <div class="post-content">
+                <p><em>Or how on earth do you render Tamil characters without a shaping engine?</em></p>
+
+<p><img src="../assets/xteink-tamil.png" alt="" width="60%" /></p>
+
+<p>I recently bought the Xteink X4 e-reader and I must say I am impressed by what
+it delivers, despite its hardware limitations. It runs on a 32bit ESP32-C3, with
+only about 400kb of SRAM and 16MB of flash. When dealing with a system that
+small, it may not be ideal to expect i18n features that parallel other
+contemporary devices, but it has proven itself to be great at what it does,
+supporting EPUB files of most languages with the Latin and Cyrillic scripts,
+with the addition of an community developed firmware<sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>.</p>
+
+<p>So adding support for Tamil characters should be as easy as sideloading a Tamil
+font and that should be it, right?<sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup> Except it’s not that simple.</p>
+
+<p>The Tamil writing system falls under what’s called a ‘abugida’<sup id="fnref:3"><a href="#fn:3" class="footnote" rel="footnote" role="doc-noteref">3</a></sup> system: each unit
+consisting of a consonent-vowel sequence. So although there are around a 247
+characters in the language, they can be represented within the 12 vowels and 18
+consonants, or a combination of them.</p>
+
+<p>Unicode follows the same, it doesn’t include all possible characters that is
+used in Tamil, instead using a shorter subset of the characters which fall
+within the range U+0B82 and U+0BCD (about 75 characters), to represent every
+character used in modern usage.</p>
+
+<p>For example: The character for Tea (டீ) is actually composed of two unicode characters - <code class="language-plaintext highlighter-rouge">ட</code>
+and <code class="language-plaintext highlighter-rouge">◌ீ</code>. This is not always left-to-right: The character Pay (பே) also consists
+of two characters, but the second input character (<code class="language-plaintext highlighter-rouge">ே</code>) precedes the first (<code class="language-plaintext highlighter-rouge">ப</code>) in the
+ligature.</p>
+
+<p>Keeping these things in mind, I designed a library to render the Tamil
+characters in the CrossPoint eReader. The character rendering happens at the
+system level, so the characters could be rendered in the UI itself as well as
+within the EPUB opened. The core of the program can be summarised as:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// 3. Above vowel sign (ி ீ)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">aboveVowel</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">aboveVowel</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">ABOVE_VOWEL</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 4. Below vowel sign (ு ூ)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">belowVowel</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">belowVowel</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">BELOW_VOWEL</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 5. Right vowel sign (ா)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">rightVowel</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">rightVowel</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 6. Right-half of split vowel</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">rightSplit</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">rightSplit</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 7. Virama / pulli (்) — displayed above/after consonant, no advance</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">virama</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">virama</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">VIRAMA</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 8. Anusvara (ஂ) — above the consonant</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">anusvara</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">anusvara</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">ANUSVARA</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>That’s right, simply adjusting the offsets based on the character input.</p>
+
+<p>Is this the fix? Almost yes, because this fails to consider the case of the ‘u’
+and ‘uu’ vowel signs that are not a simple alignment unlike the other vowel
+signs. It transforms the character entirely as done in modern text rendering
+libraries.</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1">
+      <p><a href="https://github.com/crosspoint-reader/crosspoint-reader">CrossPoint Reader</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>You could technically do that, but the text become undecipherable out of the box. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p><a href="https://www.dictionary.com/browse/abugida">abugida: dictionary.com</a> <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+            </div>
+            
+            </li>
+            
+        
+        
+
+        <li>
+            <header class="post-header">
+                <h1 class="post-title">
+                    
+                    <a class="post-link" href="/2026/03/18/another-emacs/">Will there be another Emacs?</a>
+                    
+                </h1>
+
+                <p class="post-meta">
+                    Mar 18, 2026
+                    
+                     •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/blog/">blog</a>
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+        <a href="/tags/tech/">tech</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+
+                    
+                    
+                </p>
+            </header>
+
+            <div class="post-content">
+                <p>If you had spoken with me at least once, chances are that you would’ve heard of a
+‘Emacs’.<sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup></p>
+
+<p>On surface it looks like a text editor, but beneath it is a full layer of an
+Lisp Interpreter. It may not appear impressive until you realise what it
+actually means:</p>
+
+<p>You are given the freedom to modify the very environment that
+you currently use. This means that you could inspect and override every single function and modify
+the core behaviour at runtime, without the need to ‘restart’ or compile it again.</p>
+
+<p>And Lisp (not to be confused with LISP) languages are very intuitive that anyone
+can start hacking on it. That was the case for me too, when I was 14. It was the
+best way for me to get into programming and the enthusiasm I had back then still
+lives on.</p>
+
+<p>My <code class="language-plaintext highlighter-rouge">.emacs.d</code> directory has now exceeded over 10k SLOC:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~ 
+❯ sloc --format=summary ~/.emacs.d/*.el ~/.emacs.d/lisp/*.el ~/.emacs.d/site-lisp/chizu/*.el     
+
+│ Language    │ Files │     % │  Code │    % │ Comment │    % │
+├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤
+│ EmacsLisp   │    46 │  98.2 │ 10122 │ 60.6 │    2051 │ 12.3 │
+│ Markdown    │     1 │   1.8 │     0 │  0.0 │     128 │ 35.8 │
+├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤
+│ Sum         │    47 │ 100.0 │ 10122 │ 59.3 │    2179 │ 12.8 │
+└─────────────┴───────┴───────┴───────┴──────┴─────────┴──────┘
+</code></pre></div></div>
+
+<p>This is excluding the hundreds of community packages I’ve installed, almost all
+of which comes from other users like me. So many useful packages that you
+couldn’t have imagined yourself: <a href="https://magit.vc/">magit</a>,
+<a href="https://github.com/joaotavora/yasnippet">yasnippet</a>, and much more.</p>
+
+<p>It may not be impressive in the era of fancy IDEs and LLMs that do the job for
+you, but that totally misses the point: it is not about <em>what</em> it does, more
+about <em>how</em> it does things that would’ve otherwise been tedious and
+frustruating.</p>
+
+<p>This blog used to be ran on a handwritten static-site generator before I
+switched to Jekyll later. I was so impressed that the program even worked, given
+how inexperienced in programming I was back then. That didn’t matter however, as
+long as it <em>just worked</em>:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">add-entries-to-archive</span> <span class="p">()</span>
+  <span class="p">(</span><span class="nv">with-current-buffer</span> <span class="p">(</span><span class="nv">find-file-noselect</span> <span class="s">"/home/vetrivln/Downloads/public_html/archives.html"</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nv">point-min</span><span class="p">))</span>
+    <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="s">"&lt;ul&gt;"</span><span class="p">)</span>
+    <span class="p">(</span><span class="nv">delete-region</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="s">"&lt;/ul&gt;"</span><span class="p">)</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="p">(</span><span class="nb">dolist</span> <span class="p">(</span><span class="nv">file</span> <span class="p">(</span><span class="nb">reverse</span> <span class="p">(</span><span class="nv">directory-files</span> <span class="s">"~/Downloads/public_html/articles/"</span> <span class="no">t</span> <span class="s">"^[^_].*.org$"</span> <span class="no">nil</span><span class="p">)))</span>
+      <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nv">date</span> <span class="p">(</span><span class="nv">substring</span> <span class="nv">file</span> <span class="mi">42</span> <span class="mi">52</span><span class="p">))</span>
+            <span class="p">(</span><span class="nv">file-name</span> <span class="p">(</span><span class="nv">substring</span> <span class="nv">file</span> <span class="mi">42</span> <span class="mi">-4</span><span class="p">))</span>
+            <span class="p">(</span><span class="nv">title</span> <span class="p">(</span><span class="k">progn</span>
+                     <span class="p">(</span><span class="nv">with-current-buffer</span> <span class="p">(</span><span class="nv">find-file-noselect</span> <span class="nv">file</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nv">point-min</span><span class="p">))</span>
+                       <span class="p">(</span><span class="nv">buffer-substring-no-properties</span> <span class="mi">10</span> <span class="p">(</span><span class="nv">line-end-position</span><span class="p">))))))</span>
+        <span class="p">(</span><span class="nv">insert</span> <span class="p">(</span><span class="nb">format</span> <span class="s">"\n&lt;li&gt;&lt;div class=\"date\"&gt;%s&amp;emsp;&amp;emsp;&lt;/div&gt;&lt;a href=\"articles/%s.html\"&gt;&lt;div class=\"title\"&gt;%s&lt;/div&gt;&lt;/a&gt;&lt;/li&gt;\n"</span> <span class="nv">date</span> <span class="nv">file-name</span> <span class="nv">title</span><span class="p">))</span>
+        <span class="p">(</span><span class="nv">search-forward-regexp</span> <span class="s">"&lt;/ul&gt;"</span><span class="p">)</span>
+        <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="p">(</span><span class="nv">save-buffer</span><span class="p">)))))</span>
+</code></pre></div></div>
+
+<p>In hindsight this was not the best way to do it, but that does not matter.</p>
+
+<p>Here’s another function that I wrote for an EPUB reading mode, to select one
+from the many words displayed, query the internet for its meaning and return
+only the definition from the page retrieved:</p>
+
+<div class="language-elisp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">(</span><span class="nb">defun</span> <span class="nv">find-dict-meaning</span> <span class="p">(</span><span class="nv">word</span><span class="p">)</span>
+  <span class="s">"Query Merriam Webster for the definition of WORD."</span>
+  <span class="p">(</span><span class="nv">interactive</span>
+   <span class="p">(</span><span class="nb">list</span>
+    <span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">use-region-p</span><span class="p">)</span>
+	       <span class="p">(</span><span class="nv">buffer-substring-no-properties</span> <span class="p">(</span><span class="nv">region-beginning</span><span class="p">)</span> <span class="p">(</span><span class="nv">region-end</span><span class="p">)))</span>
+          <span class="p">(</span><span class="nv">current-prefix-arg</span>
+           <span class="p">(</span><span class="nb">or</span> <span class="p">(</span><span class="nv">thing-at-point</span> <span class="ss">'word</span> <span class="no">t</span><span class="p">)</span> <span class="c1">;(read-string "word:  " (thing-at-point 'word t)))</span>
+               <span class="p">(</span><span class="nb">error</span> <span class="s">"No word to query"</span><span class="p">))</span>
+	      <span class="p">((</span><span class="nv">save-window-excursion</span>
+             <span class="p">(</span><span class="nv">call-interactively</span> <span class="nf">#'</span><span class="nv">avy-goto-word-1</span><span class="p">)</span>
+             <span class="p">(</span><span class="nv">thing-at-point</span> <span class="ss">'symbol</span> <span class="no">t</span><span class="p">))))))</span>
+  <span class="p">(</span><span class="nv">url-retrieve</span>
+   <span class="p">(</span><span class="nv">concat</span> <span class="s">"https://www.merriam-webster.com/dictionary/"</span>
+	       <span class="p">(</span><span class="nv">url-hexify-string</span> <span class="nv">word</span><span class="p">))</span>
+   <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nv">status</span><span class="p">)</span>
+     <span class="p">(</span><span class="k">unwind-protect</span> <span class="no">nil</span>
+       <span class="p">(</span><span class="k">progn</span>
+	     <span class="p">(</span><span class="nv">when-let</span> <span class="p">(</span><span class="nv">err</span> <span class="p">(</span><span class="nv">plist-get</span> <span class="nv">status</span> <span class="ss">:error</span><span class="p">))</span>
+	       <span class="p">(</span><span class="nv">user-error</span> <span class="s">"Failed to query Merriam Webster: %S %s"</span> <span class="nv">err</span> <span class="nv">word</span><span class="p">))</span>
+	     <span class="p">(</span><span class="nv">goto-char</span> <span class="p">(</span><span class="nv">point-min</span><span class="p">))</span>
+	     <span class="p">(</span><span class="nv">forward-paragraph</span><span class="p">)</span>		<span class="c1">;skip the HTTP header</span>
+	     <span class="p">(</span><span class="k">let*</span> <span class="p">((</span><span class="nv">dom</span> <span class="p">(</span><span class="nv">libxml-parse-html-region</span> <span class="p">(</span><span class="nv">point</span><span class="p">)</span> <span class="p">(</span><span class="nv">point-max</span><span class="p">)))</span>
+		        <span class="p">(</span><span class="nv">text</span> <span class="p">(</span><span class="nv">dom-strings</span> <span class="p">(</span><span class="nv">dom-by-class</span> <span class="nv">dom</span> <span class="s">"dtText"</span><span class="p">))))</span>
+           <span class="p">(</span><span class="k">setq</span> <span class="nv">text</span> <span class="p">(</span><span class="nv">mapconcat</span> <span class="nf">#'</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nv">text</span><span class="p">)</span> <span class="p">(</span><span class="nv">propertize</span> <span class="nv">text</span> <span class="ss">'face</span> <span class="ss">'italic</span><span class="p">))</span>
+                                 <span class="p">(</span><span class="nb">nbutlast</span> <span class="p">(</span><span class="nv">cl-remove-duplicates</span> <span class="p">(</span><span class="nb">append</span> <span class="nv">text</span> <span class="o">'</span><span class="p">(</span><span class="s">": "</span><span class="p">))</span> <span class="ss">:test</span> <span class="ss">'string=</span><span class="p">))</span>
+                                 <span class="s">" or "</span><span class="p">))</span>
+	       <span class="p">(</span><span class="nv">message</span> <span class="s">"%s: %s"</span> <span class="nv">word</span> <span class="p">(</span><span class="nv">string-clean-whitespace</span> <span class="nv">text</span><span class="p">))))</span>
+       <span class="p">(</span><span class="nv">kill-buffer</span><span class="p">)))))</span>
+</code></pre></div></div>
+
+<p>My <code class="language-plaintext highlighter-rouge">.emacs.d</code> directory is a graveyard of hundred other procedures, that once
+served a purpose and strangely reminds me of a time, when I did not have
+possesion of the many tools that are now available at my disposal, but had a
+curiousity and enthusiasm of a much stronger magnitude that what I currently
+possess.</p>
+
+<p>It feels wrong to be nostalgic about something as living as Emacs: surely there
+should be an active community right now as there was back then. There’s no way
+I’d know that right now, especially when I haven’t logged in on IRC for years now.</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1">
+      <p><a href="https://gnu.org/software/emacs/">Emacs Homepage</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+            </div>
+            
+            </li>
+            
         
         
 
@@ -312,114 +672,6 @@
 <p>It’s okay when someone gets bored of me. It’s okay if someone loses interest over me.</p>
 
 <p>Because more than often, these things only happen in my head than in reality.</p>
-
-            </div>
-            
-            </li>
-            
-        
-        
-
-        <li>
-            <header class="post-header">
-                <h1 class="post-title">
-                    
-                    <a class="post-link" href="/2025/11/24/objective-beauty/">Illusion of Objective Beauty</a>
-                    
-                </h1>
-
-                <p class="post-meta">
-                    Nov 24, 2025
-                    
-                     •
-  
-    
-    
-      
-    
-      
-    
-      
-    
-      
-        <a href="/snippet/">snippet</a>
-      
-    
-      
-    
-  
-
-
-
-
-                    
-                    
-                </p>
-            </header>
-
-            <div class="post-content">
-                <p>Assuming that Objectivity exists, is infactuation a proof of it that lets us see the Objective Beauty of another person?</p>
-
-<p>Or is it a proof of anti-Objectivity, that once the illusion of infactuation wears off, we quickly tend to start seeing them as they are, opposed to the Platonic ideal that existed in our minds?</p>
-
-            </div>
-            
-            </li>
-            
-        
-        
-
-        <li>
-            <header class="post-header">
-                <h1 class="post-title">
-                    
-                    <a class="post-link" href="/2025/11/09/art-beyond-artist/">Art Beyond the Artist</a>
-                    
-                </h1>
-
-                <p class="post-meta">
-                    Nov 9, 2025
-                    
-                     •
-  
-    
-    
-      
-    
-      
-    
-      
-    
-      
-        <a href="/snippet/">snippet</a>
-      
-    
-      
-    
-  
-
-
-
-
-                    
-                    
-                </p>
-            </header>
-
-            <div class="post-content">
-                <p>I still believe that the greatest thing a person can do has nothing to do with how much of a good person he was. People tend to forget the flaws of a person soon after they die, but even when they’re alive.</p>
-
-<p>Regardless of whether you’re recognised for it, the best thing you could do is leave behind a piece of media that’ll be remembered for a long time.</p>
-
-<p>Homer. George Lucas. Hideo Kojima.</p>
-
-<p>This mostly resonates with my dislike towards the modern cancel culture. Why expect political correctness from the artist rather than the art. Even why should we expect it from the latter?</p>
-
-<p>I didn’t necessarily mean I’ll make something that’ll be worthy of being preserved and remembered for generations.</p>
-
-<p>I don’t know if I’m capable of that.</p>
-
-<p>But I’ll forever have respect for those who had a vision and accurately brought it to life. The society’s obsession with hating those who pursue a career in arts is only because they haven’t made it yet and not because there’s anything wrong in what they’re doing</p>
 
             </div>
             

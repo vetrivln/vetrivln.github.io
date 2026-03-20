@@ -3,10 +3,10 @@
   <generator uri="http://jekyllrb.com" version="4.4.1">Jekyll</generator>
   
   
-  <link href="https://vetrivln.github.io/feed.xml" rel="self" type="application/atom+xml" />
-  <link href="https://vetrivln.github.io/" rel="alternate" type="text/html" hreflang="en" />
-  <updated>2026-03-16T06:52:44+00:00</updated>
-  <id>https://vetrivln.github.io/</id>
+  <link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" />
+  <link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" />
+  <updated>2026-03-20T09:36:09+00:00</updated>
+  <id>http://localhost:4000/</id>
 
   
     <title type="html">Bird Ideas</title>
@@ -26,17 +26,337 @@
 
   
   
+    <entry>
+      
+      <title type="html">Tamil support for the Xteink X4 reader</title>
+      
+      
+      <link href="http://localhost:4000/2026/03/19/xteink-x4-tamil/" rel="alternate" type="text/html" title="Tamil support for the Xteink X4 reader" />
+      
+      <published>2026-03-19T00:00:00+00:00</published>
+      <updated>2026-03-19T00:00:00+00:00</updated>
+      <id>http://localhost:4000/2026/03/19/xteink-x4-tamil</id>
+      <content type="html" xml:base="http://localhost:4000/2026/03/19/xteink-x4-tamil/">&lt;p&gt;&lt;em&gt;Or how on earth do you render Tamil characters without a shaping engine?&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../assets/xteink-tamil.png&quot; alt=&quot;&quot; width=&quot;60%&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I recently bought the Xteink X4 e-reader and I must say I am impressed by what
+it delivers, despite its hardware limitations. It runs on a 32bit ESP32-C3, with
+only about 400kb of SRAM and 16MB of flash. When dealing with a system that
+small, it may not be ideal to expect i18n features that parallel other
+contemporary devices, but it has proven itself to be great at what it does,
+supporting EPUB files of most languages with the Latin and Cyrillic scripts,
+with the addition of an community developed firmware&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot; role=&quot;doc-noteref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+
+&lt;p&gt;So adding support for Tamil characters should be as easy as sideloading a Tamil
+font and that should be it, right?&lt;sup id=&quot;fnref:2&quot;&gt;&lt;a href=&quot;#fn:2&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot; role=&quot;doc-noteref&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; Except it’s not that simple.&lt;/p&gt;
+
+&lt;p&gt;The Tamil writing system falls under what’s called a ‘abugida’&lt;sup id=&quot;fnref:3&quot;&gt;&lt;a href=&quot;#fn:3&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot; role=&quot;doc-noteref&quot;&gt;3&lt;/a&gt;&lt;/sup&gt; system: each unit
+consisting of a consonent-vowel sequence. So although there are around a 247
+characters in the language, they can be represented within the 12 vowels and 18
+consonants, or a combination of them.&lt;/p&gt;
+
+&lt;p&gt;Unicode follows the same, it doesn’t include all possible characters that is
+used in Tamil, instead using a shorter subset of the characters which fall
+within the range U+0B82 and U+0BCD (about 75 characters), to represent every
+character used in modern usage.&lt;/p&gt;
+
+&lt;p&gt;For example: The character for Tea (டீ) is actually composed of two unicode characters - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ட&lt;/code&gt;
+and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;◌ீ&lt;/code&gt;. This is not always left-to-right: The character Pay (பே) also consists
+of two characters, but the second input character (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ே&lt;/code&gt;) precedes the first (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ப&lt;/code&gt;) in the
+ligature.&lt;/p&gt;
+
+&lt;p&gt;Keeping these things in mind, I designed a library to render the Tamil
+characters in the CrossPoint eReader. The character rendering happens at the
+system level, so the characters could be rendered in the UI itself as well as
+within the EPUB opened. The core of the program can be summarised as:&lt;/p&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &lt;span class=&quot;c1&quot;&gt;// 3. Above vowel sign (ி ீ)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aboveVowel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PositionedGlyph&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepoint&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;aboveVowel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TamilOffset&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ABOVE_VOWEL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeroAdvance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glyphs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// 4. Below vowel sign (ு ூ)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;belowVowel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PositionedGlyph&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepoint&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;belowVowel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TamilOffset&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BELOW_VOWEL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeroAdvance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glyphs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// 5. Right vowel sign (ா)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rightVowel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PositionedGlyph&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepoint&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rightVowel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeroAdvance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glyphs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// 6. Right-half of split vowel&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rightSplit&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PositionedGlyph&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepoint&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rightSplit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeroAdvance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glyphs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// 7. Virama / pulli (்) — displayed above/after consonant, no advance&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;virama&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PositionedGlyph&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepoint&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;virama&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TamilOffset&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;VIRAMA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeroAdvance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glyphs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;// 8. Anusvara (ஂ) — above the consonant&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;anusvara&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;PositionedGlyph&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;codepoint&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;anusvara&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yOffset&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;TamilOffset&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ANUSVARA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeroAdvance&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;glyphs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;push_back&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;That’s right, simply adjusting the offsets based on the character input.&lt;/p&gt;
+
+&lt;p&gt;Is this the fix? Almost yes, because this fails to consider the case of the ‘u’
+and ‘uu’ vowel signs that are not a simple alignment unlike the other vowel
+signs. It transforms the character entirely as done in modern text rendering
+libraries.&lt;/p&gt;
+
+&lt;div class=&quot;footnotes&quot; role=&quot;doc-endnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;&lt;a href=&quot;https://github.com/crosspoint-reader/crosspoint-reader&quot;&gt;CrossPoint Reader&lt;/a&gt; &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:2&quot;&gt;
+      &lt;p&gt;You could technically do that, but the text become undecipherable out of the box. &lt;a href=&quot;#fnref:2&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+    &lt;li id=&quot;fn:3&quot;&gt;
+      &lt;p&gt;&lt;a href=&quot;https://www.dictionary.com/browse/abugida&quot;&gt;abugida: dictionary.com&lt;/a&gt; &lt;a href=&quot;#fnref:3&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>~vetrivln</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="blog" />
+      
+
+      
+        <category term="tech" />
+      
+
+      
+        <summary type="html">Or how on earth do you render Tamil characters without a shaping engine? I recently bought the Xteink X4 e-reader and I must say I am impressed by what it delivers, despite its hardware limitations. It runs on a 32bit ESP32-C3, with only about 400kb of SRAM and 16MB of flash. When dealing with a system that small, it may not be ideal to expect i18n features that parallel other contemporary devices, but it has proven itself to be great at what it does, supporting EPUB files of most languages with the Latin and Cyrillic scripts, with the addition of an community developed firmware1. So adding support for Tamil characters should be as easy as sideloading a Tamil font and that should be it, right?2 Except it’s not that simple. The Tamil writing system falls under what’s called a ‘abugida’3 system: each unit consisting of a consonent-vowel sequence. So although there are around a 247 characters in the language, they can be represented within the 12 vowels and 18 consonants, or a combination of them. Unicode follows the same, it doesn’t include all possible characters that is used in Tamil, instead using a shorter subset of the characters which fall within the range U+0B82 and U+0BCD (about 75 characters), to represent every character used in modern usage. For example: The character for Tea (டீ) is actually composed of two unicode characters - ட and ◌ீ. This is not always left-to-right: The character Pay (பே) also consists of two characters, but the second input character (ே) precedes the first (ப) in the ligature. Keeping these things in mind, I designed a library to render the Tamil characters in the CrossPoint eReader. The character rendering happens at the system level, so the characters could be rendered in the UI itself as well as within the EPUB opened. The core of the program can be summarised as: // 3. Above vowel sign (ி ீ) if (aboveVowel != 0) { PositionedGlyph g; g.codepoint = aboveVowel; g.xOffset = 0; g.yOffset = TamilOffset::ABOVE_VOWEL; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 4. Below vowel sign (ு ூ) if (belowVowel != 0) { PositionedGlyph g; g.codepoint = belowVowel; g.xOffset = 0; g.yOffset = TamilOffset::BELOW_VOWEL; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 5. Right vowel sign (ா) if (rightVowel != 0) { PositionedGlyph g; g.codepoint = rightVowel; g.xOffset = 0; g.yOffset = 0; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 6. Right-half of split vowel if (rightSplit != 0) { PositionedGlyph g; g.codepoint = rightSplit; g.xOffset = 0; g.yOffset = 0; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 7. Virama / pulli (்) — displayed above/after consonant, no advance if (virama != 0) { PositionedGlyph g; g.codepoint = virama; g.xOffset = -1; g.yOffset = TamilOffset::VIRAMA; g.zeroAdvance = true; cluster.glyphs.push_back(g); } // 8. Anusvara (ஂ) — above the consonant if (anusvara != 0) { PositionedGlyph g; g.codepoint = anusvara; g.xOffset = 0; g.yOffset = TamilOffset::ANUSVARA; g.zeroAdvance = true; cluster.glyphs.push_back(g); } That’s right, simply adjusting the offsets based on the character input. Is this the fix? Almost yes, because this fails to consider the case of the ‘u’ and ‘uu’ vowel signs that are not a simple alignment unlike the other vowel signs. It transforms the character entirely as done in modern text rendering libraries. CrossPoint Reader &amp;#8617; You could technically do that, but the text become undecipherable out of the box. &amp;#8617; abugida: dictionary.com &amp;#8617;</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
+    <entry>
+      
+      <title type="html">Will there be another Emacs?</title>
+      
+      
+      <link href="http://localhost:4000/2026/03/18/another-emacs/" rel="alternate" type="text/html" title="Will there be another Emacs?" />
+      
+      <published>2026-03-18T00:00:00+00:00</published>
+      <updated>2026-03-18T00:00:00+00:00</updated>
+      <id>http://localhost:4000/2026/03/18/another-emacs</id>
+      <content type="html" xml:base="http://localhost:4000/2026/03/18/another-emacs/">&lt;p&gt;If you had spoken with me at least once, chances are that you would’ve heard of a
+‘Emacs’.&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot; role=&quot;doc-noteref&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;p&gt;On surface it looks like a text editor, but beneath it is a full layer of an
+Lisp Interpreter. It may not appear impressive until you realise what it
+actually means:&lt;/p&gt;
+
+&lt;p&gt;You are given the freedom to modify the very environment that
+you currently use. This means that you could inspect and override every single function and modify
+the core behaviour at runtime, without the need to ‘restart’ or compile it again.&lt;/p&gt;
+
+&lt;p&gt;And Lisp (not to be confused with LISP) languages are very intuitive that anyone
+can start hacking on it. That was the case for me too, when I was 14. It was the
+best way for me to get into programming and the enthusiasm I had back then still
+lives on.&lt;/p&gt;
+
+&lt;p&gt;My &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.emacs.d&lt;/code&gt; directory has now exceeded over 10k SLOC:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;~ 
+❯ sloc --format=summary ~/.emacs.d/*.el ~/.emacs.d/lisp/*.el ~/.emacs.d/site-lisp/chizu/*.el     
+
+│ Language    │ Files │     % │  Code │    % │ Comment │    % │
+├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤
+│ EmacsLisp   │    46 │  98.2 │ 10122 │ 60.6 │    2051 │ 12.3 │
+│ Markdown    │     1 │   1.8 │     0 │  0.0 │     128 │ 35.8 │
+├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤
+│ Sum         │    47 │ 100.0 │ 10122 │ 59.3 │    2179 │ 12.8 │
+└─────────────┴───────┴───────┴───────┴──────┴─────────┴──────┘
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is excluding the hundreds of community packages I’ve installed, almost all
+of which comes from other users like me. So many useful packages that you
+couldn’t have imagined yourself: &lt;a href=&quot;https://magit.vc/&quot;&gt;magit&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/joaotavora/yasnippet&quot;&gt;yasnippet&lt;/a&gt;, and much more.&lt;/p&gt;
+
+&lt;p&gt;It may not be impressive in the era of fancy IDEs and LLMs that do the job for
+you, but that totally misses the point: it is not about &lt;em&gt;what&lt;/em&gt; it does, more
+about &lt;em&gt;how&lt;/em&gt; it does things that would’ve otherwise been tedious and
+frustruating.&lt;/p&gt;
+
+&lt;p&gt;This blog used to be ran on a handwritten static-site generator before I
+switched to Jekyll later. I was so impressed that the program even worked, given
+how inexperienced in programming I was back then. That didn’t matter however, as
+long as it &lt;em&gt;just worked&lt;/em&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-elisp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;defun&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;add-entries-to-archive&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;with-current-buffer&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;find-file-noselect&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/home/vetrivln/Downloads/public_html/archives.html&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;goto-char&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point-min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;search-forward-regexp&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;ul&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;delete-region&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;search-forward-regexp&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;/ul&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;goto-char&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dolist&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;reverse&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;directory-files&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;~/Downloads/public_html/articles/&quot;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;^[^_].*.org$&quot;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;nil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;substring&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;52&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;file-name&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;substring&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;42&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;-4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;title&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;progn&lt;/span&gt;
+                     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;with-current-buffer&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;find-file-noselect&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;goto-char&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point-min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+                       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;buffer-substring-no-properties&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;line-end-position&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))))&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;insert&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;\n&amp;lt;li&amp;gt;&amp;lt;div class=\&quot;date\&quot;&amp;gt;%s&amp;amp;emsp;&amp;amp;emsp;&amp;lt;/div&amp;gt;&amp;lt;a href=\&quot;articles/%s.html\&quot;&amp;gt;&amp;lt;div class=\&quot;title\&quot;&amp;gt;%s&amp;lt;/div&amp;gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;\n&quot;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;file-name&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;search-forward-regexp&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;/ul&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;goto-char&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;save-buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In hindsight this was not the best way to do it, but that does not matter.&lt;/p&gt;
+
+&lt;p&gt;Here’s another function that I wrote for an EPUB reading mode, to select one
+from the many words displayed, query the internet for its meaning and return
+only the definition from the page retrieved:&lt;/p&gt;
+
+&lt;div class=&quot;language-elisp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;defun&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;find-dict-meaning&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;&quot;Query Merriam Webster for the definition of WORD.&quot;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;interactive&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cond&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;use-region-p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;buffer-substring-no-properties&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;region-beginning&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;region-end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+          &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;current-prefix-arg&lt;/span&gt;
+           &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;thing-at-point&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&apos;word&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;;(read-string &quot;word:  &quot; (thing-at-point &apos;word t)))&lt;/span&gt;
+               &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;error&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;No word to query&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+	      &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;save-window-excursion&lt;/span&gt;
+             &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;call-interactively&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;#&apos;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;avy-goto-word-1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+             &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;thing-at-point&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&apos;symbol&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))))&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;url-retrieve&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;concat&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;https://www.merriam-webster.com/dictionary/&quot;&lt;/span&gt;
+	       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;url-hexify-string&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;unwind-protect&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;nil&lt;/span&gt;
+       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;progn&lt;/span&gt;
+	     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;when-let&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;plist-get&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+	       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;user-error&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Failed to query Merriam Webster: %S %s&quot;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;word&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+	     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;goto-char&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point-min&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+	     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;forward-paragraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;		&lt;span class=&quot;c1&quot;&gt;;skip the HTTP header&lt;/span&gt;
+	     &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;let*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;dom&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;libxml-parse-html-region&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;point-max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+		        &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;text&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;dom-strings&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;dom-by-class&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;dom&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;dtText&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+           &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;setq&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;text&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;mapconcat&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;#&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;lambda&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;propertize&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;text&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&apos;face&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&apos;italic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+                                 &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;nbutlast&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;cl-remove-duplicates&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;append&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;text&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;: &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:test&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;&apos;string=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+                                 &lt;span class=&quot;s&quot;&gt;&quot; or &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+	       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;%s: %s&quot;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;word&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;string-clean-whitespace&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))))&lt;/span&gt;
+       &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;kill-buffer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;My &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.emacs.d&lt;/code&gt; directory is a graveyard of hundred other procedures, that once
+served a purpose and strangely reminds me of a time, when I did not have
+possesion of the many tools that are now available at my disposal, but had a
+curiousity and enthusiasm of a much stronger magnitude that what I currently
+possess.&lt;/p&gt;
+
+&lt;p&gt;It feels wrong to be nostalgic about something as living as Emacs: surely there
+should be an active community right now as there was back then. There’s no way
+I’d know that right now, especially when I haven’t logged in on IRC for years now.&lt;/p&gt;
+
+&lt;div class=&quot;footnotes&quot; role=&quot;doc-endnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;&lt;a href=&quot;https://gnu.org/software/emacs/&quot;&gt;Emacs Homepage&lt;/a&gt; &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>~vetrivln</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="blog" />
+      
+
+      
+        <category term="tech" />
+      
+
+      
+        <summary type="html">If you had spoken with me at least once, chances are that you would’ve heard of a ‘Emacs’.1 On surface it looks like a text editor, but beneath it is a full layer of an Lisp Interpreter. It may not appear impressive until you realise what it actually means: You are given the freedom to modify the very environment that you currently use. This means that you could inspect and override every single function and modify the core behaviour at runtime, without the need to ‘restart’ or compile it again. And Lisp (not to be confused with LISP) languages are very intuitive that anyone can start hacking on it. That was the case for me too, when I was 14. It was the best way for me to get into programming and the enthusiasm I had back then still lives on. My .emacs.d directory has now exceeded over 10k SLOC: ~ ❯ sloc --format=summary ~/.emacs.d/*.el ~/.emacs.d/lisp/*.el ~/.emacs.d/site-lisp/chizu/*.el │ Language │ Files │ % │ Code │ % │ Comment │ % │ ├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤ │ EmacsLisp │ 46 │ 98.2 │ 10122 │ 60.6 │ 2051 │ 12.3 │ │ Markdown │ 1 │ 1.8 │ 0 │ 0.0 │ 128 │ 35.8 │ ├─────────────┼───────┼───────┼───────┼──────┼─────────┼──────┤ │ Sum │ 47 │ 100.0 │ 10122 │ 59.3 │ 2179 │ 12.8 │ └─────────────┴───────┴───────┴───────┴──────┴─────────┴──────┘ This is excluding the hundreds of community packages I’ve installed, almost all of which comes from other users like me. So many useful packages that you couldn’t have imagined yourself: magit, yasnippet, and much more. It may not be impressive in the era of fancy IDEs and LLMs that do the job for you, but that totally misses the point: it is not about what it does, more about how it does things that would’ve otherwise been tedious and frustruating. This blog used to be ran on a handwritten static-site generator before I switched to Jekyll later. I was so impressed that the program even worked, given how inexperienced in programming I was back then. That didn’t matter however, as long as it just worked: (defun add-entries-to-archive () (with-current-buffer (find-file-noselect &quot;/home/vetrivln/Downloads/public_html/archives.html&quot;) (goto-char (point-min)) (search-forward-regexp &quot;&amp;lt;ul&amp;gt;&quot;) (delete-region (point) (- (search-forward-regexp &quot;&amp;lt;/ul&amp;gt;&quot;) 6)) (goto-char (- (point) 6)) (dolist (file (reverse (directory-files &quot;~/Downloads/public_html/articles/&quot; t &quot;^[^_].*.org$&quot; nil))) (let ((date (substring file 42 52)) (file-name (substring file 42 -4)) (title (progn (with-current-buffer (find-file-noselect file) (goto-char (point-min)) (buffer-substring-no-properties 10 (line-end-position)))))) (insert (format &quot;\n&amp;lt;li&amp;gt;&amp;lt;div class=\&quot;date\&quot;&amp;gt;%s&amp;amp;emsp;&amp;amp;emsp;&amp;lt;/div&amp;gt;&amp;lt;a href=\&quot;articles/%s.html\&quot;&amp;gt;&amp;lt;div class=\&quot;title\&quot;&amp;gt;%s&amp;lt;/div&amp;gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;\n&quot; date file-name title)) (search-forward-regexp &quot;&amp;lt;/ul&amp;gt;&quot;) (goto-char (- (point) 6)) (save-buffer))))) In hindsight this was not the best way to do it, but that does not matter. Here’s another function that I wrote for an EPUB reading mode, to select one from the many words displayed, query the internet for its meaning and return only the definition from the page retrieved: (defun find-dict-meaning (word) &quot;Query Merriam Webster for the definition of WORD.&quot; (interactive (list (cond ((use-region-p) (buffer-substring-no-properties (region-beginning) (region-end))) (current-prefix-arg (or (thing-at-point &apos;word t) ;(read-string &quot;word: &quot; (thing-at-point &apos;word t))) (error &quot;No word to query&quot;)) ((save-window-excursion (call-interactively #&apos;avy-goto-word-1) (thing-at-point &apos;symbol t)))))) (url-retrieve (concat &quot;https://www.merriam-webster.com/dictionary/&quot; (url-hexify-string word)) (lambda (status) (unwind-protect nil (progn (when-let (err (plist-get status :error)) (user-error &quot;Failed to query Merriam Webster: %S %s&quot; err word)) (goto-char (point-min)) (forward-paragraph) ;skip the HTTP header (let* ((dom (libxml-parse-html-region (point) (point-max))) (text (dom-strings (dom-by-class dom &quot;dtText&quot;)))) (setq text (mapconcat #&apos;(lambda (text) (propertize text &apos;face &apos;italic)) (nbutlast (cl-remove-duplicates (append text &apos;(&quot;: &quot;)) :test &apos;string=)) &quot; or &quot;)) (message &quot;%s: %s&quot; word (string-clean-whitespace text)))) (kill-buffer))))) My .emacs.d directory is a graveyard of hundred other procedures, that once served a purpose and strangely reminds me of a time, when I did not have possesion of the many tools that are now available at my disposal, but had a curiousity and enthusiasm of a much stronger magnitude that what I currently possess. It feels wrong to be nostalgic about something as living as Emacs: surely there should be an active community right now as there was back then. There’s no way I’d know that right now, especially when I haven’t logged in on IRC for years now. Emacs Homepage &amp;#8617;</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
     <entry xml:lang="tamil">
       
       <title type="html">When do you actually ‘know’ a language?</title>
       
       
-      <link href="https://vetrivln.github.io/2026/02/09/knowing-a-language/" rel="alternate" type="text/html" title="When do you actually &apos;know&apos; a language?" />
+      <link href="http://localhost:4000/2026/02/09/knowing-a-language/" rel="alternate" type="text/html" title="When do you actually &apos;know&apos; a language?" />
       
       <published>2026-02-09T00:00:00+00:00</published>
       <updated>2026-02-09T00:00:00+00:00</updated>
-      <id>https://vetrivln.github.io/2026/02/09/knowing-a-language</id>
-      <content type="html" xml:base="https://vetrivln.github.io/2026/02/09/knowing-a-language/">&lt;p&gt;&lt;em&gt;Or how I am no different from a monoglot despite speaking many languages.&lt;/em&gt;&lt;/p&gt;
+      <id>http://localhost:4000/2026/02/09/knowing-a-language</id>
+      <content type="html" xml:base="http://localhost:4000/2026/02/09/knowing-a-language/">&lt;p&gt;&lt;em&gt;Or how I am no different from a monoglot despite speaking many languages.&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;It is actually very easy to learn languages at the surface level. Being able to order food, ask for the directions, and greet the people of the country you just arrived in, all takes a maximum of few days.&lt;/p&gt;
 
@@ -97,12 +417,12 @@
       <title type="html">Attempting to build a wafer defect detection system</title>
       
       
-      <link href="https://vetrivln.github.io/2026/01/28/wafer-defect-detect/" rel="alternate" type="text/html" title="Attempting to build a wafer defect detection system" />
+      <link href="http://localhost:4000/2026/01/28/wafer-defect-detect/" rel="alternate" type="text/html" title="Attempting to build a wafer defect detection system" />
       
       <published>2026-01-28T00:00:00+00:00</published>
       <updated>2026-01-28T00:00:00+00:00</updated>
-      <id>https://vetrivln.github.io/2026/01/28/wafer-defect-detect</id>
-      <content type="html" xml:base="https://vetrivln.github.io/2026/01/28/wafer-defect-detect/">&lt;p&gt;As a&lt;/p&gt;</content>
+      <id>http://localhost:4000/2026/01/28/wafer-defect-detect</id>
+      <content type="html" xml:base="http://localhost:4000/2026/01/28/wafer-defect-detect/">&lt;p&gt;As a&lt;/p&gt;</content>
 
       
       
@@ -141,12 +461,12 @@
       <title type="html">Wabi Sabi</title>
       
       
-      <link href="https://vetrivln.github.io/2025/11/25/wabi-sabi/" rel="alternate" type="text/html" title="Wabi Sabi" />
+      <link href="http://localhost:4000/2025/11/25/wabi-sabi/" rel="alternate" type="text/html" title="Wabi Sabi" />
       
       <published>2025-11-25T00:00:00+00:00</published>
       <updated>2025-11-25T00:00:00+00:00</updated>
-      <id>https://vetrivln.github.io/2025/11/25/wabi-sabi</id>
-      <content type="html" xml:base="https://vetrivln.github.io/2025/11/25/wabi-sabi/">&lt;p&gt;I still don’t know to see imperfections in external things, but it has become evident to me that I could start seeing the imperfections in myself.&lt;/p&gt;
+      <id>http://localhost:4000/2025/11/25/wabi-sabi</id>
+      <content type="html" xml:base="http://localhost:4000/2025/11/25/wabi-sabi/">&lt;p&gt;I still don’t know to see imperfections in external things, but it has become evident to me that I could start seeing the imperfections in myself.&lt;/p&gt;
 
 &lt;p&gt;Things that which I don’t have any control over.&lt;/p&gt;
 
@@ -191,12 +511,12 @@
       <title type="html">Illusion of Objective Beauty</title>
       
       
-      <link href="https://vetrivln.github.io/2025/11/24/objective-beauty/" rel="alternate" type="text/html" title="Illusion of Objective Beauty" />
+      <link href="http://localhost:4000/2025/11/24/objective-beauty/" rel="alternate" type="text/html" title="Illusion of Objective Beauty" />
       
       <published>2025-11-24T00:00:00+00:00</published>
       <updated>2025-11-24T00:00:00+00:00</updated>
-      <id>https://vetrivln.github.io/2025/11/24/objective-beauty</id>
-      <content type="html" xml:base="https://vetrivln.github.io/2025/11/24/objective-beauty/">&lt;p&gt;Assuming that Objectivity exists, is infactuation a proof of it that lets us see the Objective Beauty of another person?&lt;/p&gt;
+      <id>http://localhost:4000/2025/11/24/objective-beauty</id>
+      <content type="html" xml:base="http://localhost:4000/2025/11/24/objective-beauty/">&lt;p&gt;Assuming that Objectivity exists, is infactuation a proof of it that lets us see the Objective Beauty of another person?&lt;/p&gt;
 
 &lt;p&gt;Or is it a proof of anti-Objectivity, that once the illusion of infactuation wears off, we quickly tend to start seeing them as they are, opposed to the Platonic ideal that existed in our minds?&lt;/p&gt;</content>
 
@@ -235,12 +555,12 @@
       <title type="html">Art Beyond the Artist</title>
       
       
-      <link href="https://vetrivln.github.io/2025/11/09/art-beyond-artist/" rel="alternate" type="text/html" title="Art Beyond the Artist" />
+      <link href="http://localhost:4000/2025/11/09/art-beyond-artist/" rel="alternate" type="text/html" title="Art Beyond the Artist" />
       
       <published>2025-11-09T00:00:00+00:00</published>
       <updated>2025-11-09T00:00:00+00:00</updated>
-      <id>https://vetrivln.github.io/2025/11/09/art-beyond-artist</id>
-      <content type="html" xml:base="https://vetrivln.github.io/2025/11/09/art-beyond-artist/">&lt;p&gt;I still believe that the greatest thing a person can do has nothing to do with how much of a good person he was. People tend to forget the flaws of a person soon after they die, but even when they’re alive.&lt;/p&gt;
+      <id>http://localhost:4000/2025/11/09/art-beyond-artist</id>
+      <content type="html" xml:base="http://localhost:4000/2025/11/09/art-beyond-artist/">&lt;p&gt;I still believe that the greatest thing a person can do has nothing to do with how much of a good person he was. People tend to forget the flaws of a person soon after they die, but even when they’re alive.&lt;/p&gt;
 
 &lt;p&gt;Regardless of whether you’re recognised for it, the best thing you could do is leave behind a piece of media that’ll be remembered for a long time.&lt;/p&gt;
 
@@ -289,12 +609,12 @@
       <title type="html">There is a joy so ancient and immense that transcends the limit of language and comprehension</title>
       
       
-      <link href="https://vetrivln.github.io/2025/11/01/cathedrals-everywhere/" rel="alternate" type="text/html" title="There is a joy so ancient and immense that transcends the limit of language and comprehension" />
+      <link href="http://localhost:4000/2025/11/01/cathedrals-everywhere/" rel="alternate" type="text/html" title="There is a joy so ancient and immense that transcends the limit of language and comprehension" />
       
       <published>2025-11-01T00:00:00+00:00</published>
       <updated>2025-11-01T00:00:00+00:00</updated>
-      <id>https://vetrivln.github.io/2025/11/01/cathedrals-everywhere</id>
-      <content type="html" xml:base="https://vetrivln.github.io/2025/11/01/cathedrals-everywhere/">&lt;p&gt;How do you describe the feeling where you spend time watching the same old stuff that you keep seeing everyday, but suddenly everything appears more beautiful and heartwarming?&lt;/p&gt;
+      <id>http://localhost:4000/2025/11/01/cathedrals-everywhere</id>
+      <content type="html" xml:base="http://localhost:4000/2025/11/01/cathedrals-everywhere/">&lt;p&gt;How do you describe the feeling where you spend time watching the same old stuff that you keep seeing everyday, but suddenly everything appears more beautiful and heartwarming?&lt;/p&gt;
 
 &lt;p&gt;There’s a freeway that connects my Uni to the City. I’ve been through this same route more than a hundred times and yet it never appeared remarkable.&lt;/p&gt;
 

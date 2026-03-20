@@ -30,6 +30,10 @@ table {
   text-align: left;
 }
 
+p {
+  text-align: justify;
+}
+
 /**
  * Set `margin-bottom` to maintain vertical rhythm
  */
@@ -46,6 +50,8 @@ ul, ol, dl, figure,
 img {
   max-width: 100%;
   vertical-align: middle;
+  display: block;
+  margin: auto;
 }
 
 /**
@@ -108,7 +114,6 @@ blockquote {
   border-left: 4px solid rgb(231.75, 231.75, 231.75);
   padding-left: 15px;
   font-size: 18px;
-  letter-spacing: -1px;
   font-style: italic;
 }
 blockquote > :last-child {

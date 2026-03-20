@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Tamil support for the Xteink X4 reader</title>
+  <meta name="description" content="Or how on earth do you render Tamil characters without a shaping engine? I recently bought the Xteink X4 e-reader and I must say I am impressed by what it delivers, despite its hardware limitations. It runs on a 32bit ESP32-C3, with only about 400kb of SRAM and 16MB of flash. When dealing with a system that small, it may not be ideal to expect i18n features that parallel other contemporary devices, but it has proven itself to be great at what it does, supporting EPUB files of most languages with the Latin and Cyrillic scripts, with the addition of an community developed firmware1. So adding support for Tamil characters should be as easy as sideloading a Tamil font and that should be it, right?2 Except it’s not that simple. The Tamil writing system falls under what’s called a ‘abugida’3 system: each unit consisting of a consonent-vowel sequence. So although there are around a 247 characters in the language, they can be represented within the 12 vowels and 18 consonants, or a combination of them. Unicode follows the same, it doesn’t include all possible characters that is used in Tamil, instead using a shorter subset of the characters which fall within the range U+0B82 and U+0BCD (about 75 characters), to represent every character used in modern usage. For example: The character for Tea (டீ) is actually composed of two unicode characters - ட and ◌ீ. This is not always left-to-right: The character Pay (பே) also consists of two characters, but the second input character (ே) precedes the first (ப) in the ligature. Keeping these things in mind, I designed a library to render the Tamil characters in the CrossPoint eReader. The character rendering happens at the system level, so the characters could be rendered in the UI itself as well as within the EPUB opened. The core of the program can be summarised as: // 3. Above vowel sign (ி ீ) if (aboveVowel != 0) { PositionedGlyph g; g.codepoint = aboveVowel; g.xOffset = 0; g.yOffset = TamilOffset::ABOVE_VOWEL; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 4. Below vowel sign (ு ூ) if (belowVowel != 0) { PositionedGlyph g; g.codepoint = belowVowel; g.xOffset = 0; g.yOffset = TamilOffset::BELOW_VOWEL; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 5. Right vowel sign (ா) if (rightVowel != 0) { PositionedGlyph g; g.codepoint = rightVowel; g.xOffset = 0; g.yOffset = 0; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 6. Right-half of split vowel if (rightSplit != 0) { PositionedGlyph g; g.codepoint = rightSplit; g.xOffset = 0; g.yOffset = 0; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 7. Virama / pulli (்) — displayed above/after consonant, no advance if (virama != 0) { PositionedGlyph g; g.codepoint = virama; g.xOffset = -1; g.yOffset = TamilOffset::VIRAMA; g.zeroAdvance = true; cluster.glyphs.push_back(g); } // 8. Anusvara (ஂ) — above the consonant if (anusvara != 0) { PositionedGlyph g; g.codepoint = anusvara; g.xOffset = 0; g.yOffset = TamilOffset::ANUSVARA; g.zeroAdvance = true; cluster.glyphs.push_back(g); } That’s right, simply adjusting the offsets based on the character input. Is this the fix? Almost yes, because this fails to consider the case of the ‘u’ and ‘uu’ vowel signs that are not a simple alignment unlike the other vowel signs. It transforms the character entirely as done in modern text rendering libraries. CrossPoint Reader &amp;#8617; You could technically do that, but the text become undecipherable out of the box. &amp;#8617; abugida: dictionary.com &amp;#8617;">
+  
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2026/03/19/xteink-x4-tamil/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="Bird Ideas" href="http://localhost:4000/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Tamil support for the Xteink X4 reader">
+  <meta property="og:site_name" content="Bird Ideas">
+  <meta property="og:url" content="http://localhost:4000/2026/03/19/xteink-x4-tamil/">
+  <meta property="og:description" content="Or how on earth do you render Tamil characters without a shaping engine? I recently bought the Xteink X4 e-reader and I must say I am impressed by what it delivers, despite its hardware limitations. It runs on a 32bit ESP32-C3, with only about 400kb of SRAM and 16MB of flash. When dealing with a system that small, it may not be ideal to expect i18n features that parallel other contemporary devices, but it has proven itself to be great at what it does, supporting EPUB files of most languages with the Latin and Cyrillic scripts, with the addition of an community developed firmware1. So adding support for Tamil characters should be as easy as sideloading a Tamil font and that should be it, right?2 Except it’s not that simple. The Tamil writing system falls under what’s called a ‘abugida’3 system: each unit consisting of a consonent-vowel sequence. So although there are around a 247 characters in the language, they can be represented within the 12 vowels and 18 consonants, or a combination of them. Unicode follows the same, it doesn’t include all possible characters that is used in Tamil, instead using a shorter subset of the characters which fall within the range U+0B82 and U+0BCD (about 75 characters), to represent every character used in modern usage. For example: The character for Tea (டீ) is actually composed of two unicode characters - ட and ◌ீ. This is not always left-to-right: The character Pay (பே) also consists of two characters, but the second input character (ே) precedes the first (ப) in the ligature. Keeping these things in mind, I designed a library to render the Tamil characters in the CrossPoint eReader. The character rendering happens at the system level, so the characters could be rendered in the UI itself as well as within the EPUB opened. The core of the program can be summarised as: // 3. Above vowel sign (ி ீ) if (aboveVowel != 0) { PositionedGlyph g; g.codepoint = aboveVowel; g.xOffset = 0; g.yOffset = TamilOffset::ABOVE_VOWEL; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 4. Below vowel sign (ு ூ) if (belowVowel != 0) { PositionedGlyph g; g.codepoint = belowVowel; g.xOffset = 0; g.yOffset = TamilOffset::BELOW_VOWEL; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 5. Right vowel sign (ா) if (rightVowel != 0) { PositionedGlyph g; g.codepoint = rightVowel; g.xOffset = 0; g.yOffset = 0; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 6. Right-half of split vowel if (rightSplit != 0) { PositionedGlyph g; g.codepoint = rightSplit; g.xOffset = 0; g.yOffset = 0; g.zeroAdvance = false; cluster.glyphs.push_back(g); } // 7. Virama / pulli (்) — displayed above/after consonant, no advance if (virama != 0) { PositionedGlyph g; g.codepoint = virama; g.xOffset = -1; g.yOffset = TamilOffset::VIRAMA; g.zeroAdvance = true; cluster.glyphs.push_back(g); } // 8. Anusvara (ஂ) — above the consonant if (anusvara != 0) { PositionedGlyph g; g.codepoint = anusvara; g.xOffset = 0; g.yOffset = TamilOffset::ANUSVARA; g.zeroAdvance = true; cluster.glyphs.push_back(g); } That’s right, simply adjusting the offsets based on the character input. Is this the fix? Almost yes, because this fails to consider the case of the ‘u’ and ‘uu’ vowel signs that are not a simple alignment unlike the other vowel signs. It transforms the character entirely as done in modern text rendering libraries. CrossPoint Reader &amp;#8617; You could technically do that, but the text become undecipherable out of the box. &amp;#8617; abugida: dictionary.com &amp;#8617;">
+  
+  
+  <meta name="twitter:card" content="summary">
+  
+  <meta name="twitter:title" content="Tamil support for the Xteink X4 reader">
+  <meta name="twitter:description" content="Or how on earth do you render Tamil characters without a shaping engine? I recently bought the Xteink X4 e-reader and I must say I am impressed by what it delivers, despite its hardware limitations...">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Bird Ideas</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/cv/">About</a>
+      
+        
+        <a class="page-link" href="/archives/">Archives</a>
+      
+        
+        <a class="page-link" href="https://github.com/vetrivln">GitHub</a>
+      
+        
+        <a class="page-link" href="https://remembermay2009.com">🐅</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Tamil support for the Xteink X4 reader</h1>
+    
+    <p class="post-meta"><time datetime="2026-03-19T00:00:00+00:00" itemprop="datePublished">Mar 19, 2026</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/blog/">blog</a>
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+        <a href="/tags/tech/">tech</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p><em>Or how on earth do you render Tamil characters without a shaping engine?</em></p>
+
+<p><img src="../assets/xteink-tamil.png" alt="" width="60%" /></p>
+
+<p>I recently bought the Xteink X4 e-reader and I must say I am impressed by what
+it delivers, despite its hardware limitations. It runs on a 32bit ESP32-C3, with
+only about 400kb of SRAM and 16MB of flash. When dealing with a system that
+small, it may not be ideal to expect i18n features that parallel other
+contemporary devices, but it has proven itself to be great at what it does,
+supporting EPUB files of most languages with the Latin and Cyrillic scripts,
+with the addition of an community developed firmware<sup id="fnref:1"><a href="#fn:1" class="footnote" rel="footnote" role="doc-noteref">1</a></sup>.</p>
+
+<p>So adding support for Tamil characters should be as easy as sideloading a Tamil
+font and that should be it, right?<sup id="fnref:2"><a href="#fn:2" class="footnote" rel="footnote" role="doc-noteref">2</a></sup> Except it’s not that simple.</p>
+
+<p>The Tamil writing system falls under what’s called a ‘abugida’<sup id="fnref:3"><a href="#fn:3" class="footnote" rel="footnote" role="doc-noteref">3</a></sup> system: each unit
+consisting of a consonent-vowel sequence. So although there are around a 247
+characters in the language, they can be represented within the 12 vowels and 18
+consonants, or a combination of them.</p>
+
+<p>Unicode follows the same, it doesn’t include all possible characters that is
+used in Tamil, instead using a shorter subset of the characters which fall
+within the range U+0B82 and U+0BCD (about 75 characters), to represent every
+character used in modern usage.</p>
+
+<p>For example: The character for Tea (டீ) is actually composed of two unicode characters - <code class="language-plaintext highlighter-rouge">ட</code>
+and <code class="language-plaintext highlighter-rouge">◌ீ</code>. This is not always left-to-right: The character Pay (பே) also consists
+of two characters, but the second input character (<code class="language-plaintext highlighter-rouge">ே</code>) precedes the first (<code class="language-plaintext highlighter-rouge">ப</code>) in the
+ligature.</p>
+
+<p>Keeping these things in mind, I designed a library to render the Tamil
+characters in the CrossPoint eReader. The character rendering happens at the
+system level, so the characters could be rendered in the UI itself as well as
+within the EPUB opened. The core of the program can be summarised as:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// 3. Above vowel sign (ி ீ)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">aboveVowel</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">aboveVowel</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">ABOVE_VOWEL</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 4. Below vowel sign (ு ூ)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">belowVowel</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">belowVowel</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">BELOW_VOWEL</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 5. Right vowel sign (ா)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">rightVowel</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">rightVowel</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 6. Right-half of split vowel</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">rightSplit</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">rightSplit</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 7. Virama / pulli (்) — displayed above/after consonant, no advance</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">virama</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">virama</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">VIRAMA</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 8. Anusvara (ஂ) — above the consonant</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">anusvara</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PositionedGlyph</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">codepoint</span>   <span class="o">=</span> <span class="n">anusvara</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">xOffset</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">yOffset</span>     <span class="o">=</span> <span class="n">TamilOffset</span><span class="o">::</span><span class="n">ANUSVARA</span><span class="p">;</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">zeroAdvance</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+    <span class="n">cluster</span><span class="p">.</span><span class="n">glyphs</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">g</span><span class="p">);</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p>That’s right, simply adjusting the offsets based on the character input.</p>
+
+<p>Is this the fix? Almost yes, because this fails to consider the case of the ‘u’
+and ‘uu’ vowel signs that are not a simple alignment unlike the other vowel
+signs. It transforms the character entirely as done in modern text rendering
+libraries.</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1">
+      <p><a href="https://github.com/crosspoint-reader/crosspoint-reader">CrossPoint Reader</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>You could technically do that, but the text become undecipherable out of the box. <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p><a href="https://www.dictionary.com/browse/abugida">abugida: dictionary.com</a> <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; <a rel="license" href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0</a><br />
+~vetrivln
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
