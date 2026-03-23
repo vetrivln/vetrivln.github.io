@@ -190,6 +190,11 @@ pre > code {
   clear: both;
 }
 
+.scrollable-code {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
 /**
  * Site header
  */

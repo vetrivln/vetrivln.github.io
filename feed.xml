@@ -5,7 +5,7 @@
   
   <link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" />
   <link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" />
-  <updated>2026-03-20T13:41:13+00:00</updated>
+  <updated>2026-03-23T12:33:16+00:00</updated>
   <id>http://localhost:4000/</id>
 
   
@@ -24,6 +24,813 @@
     </author>
   
 
+  
+  
+    <entry>
+      
+      <title type="html">Better ways to type on a &amp;lt;5% Keyboard</title>
+      
+      
+      <link href="http://localhost:4000/2026/03/22/better-input-methods/" rel="alternate" type="text/html" title="Better ways to type on a &lt;5% Keyboard" />
+      
+      <published>2026-03-22T00:00:00+00:00</published>
+      <updated>2026-03-22T00:00:00+00:00</updated>
+      <id>http://localhost:4000/2026/03/22/better-input-methods</id>
+      <content type="html" xml:base="http://localhost:4000/2026/03/22/better-input-methods/">&lt;script&gt;
+  MathJax = {
+    options: {
+      enableMenu: false
+    }
+  };
+&lt;/script&gt;
+
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;When was the last time you enjoyed typing down what you wanted on a TV with
+nothing but a remote? All the solutions to speeden up text input on such devices
+are mostly a voice recognision alternative, or something like a gaze-based
+detection of input.&lt;/p&gt;
+
+&lt;p&gt;Is there a way to make typing efficient on a consumer remote that has nothing more
+than navigation buttons?&lt;/p&gt;
+
+&lt;p&gt;Theoretically how could you possibly reduce the number of keystrokes to type a
+single character while still maintaining the keystrokes/available-keys ratio,
+while still not going up high the learning curve? Employing a decision-tree
+based input method might help here.&lt;/p&gt;
+
+&lt;p&gt;For the sake of simplicity, let us assume that we still retain our existing
+QWERTY keyboard with 4 rows, (alphabets and numbers, symbols excluded). And that
+the first keystroke is spent to select one among those 4 rows.&lt;/p&gt;
+
+&lt;p&gt;If we allow a maximum choice of 12 inputs from a single row, that covers most of
+the punctuation used in English— &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;:;&amp;lt;,&amp;gt;.?/_-+={}[]&quot;&apos;?/&lt;/code&gt;. 12, because it is a
+factor of 4, and each of the arrow keys could easily be assigned a equal number
+of characters.&lt;/p&gt;
+
+&lt;p&gt;So the second input narrows the selection down to 3 adjacent characters, and the
+third input could finalize the choice of the key pressed. Sounds good, but how
+well does this fare?&lt;/p&gt;
+
+&lt;p&gt;By the standards of the metric we just invented (totally scientific!), we map 45
+characters to 4 keys to a combination of 3 keystrokes.&lt;/p&gt;
+
+&lt;p&gt;We want &lt;strong&gt;efficiency to decrease&lt;/strong&gt; if either:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The average keystrokes per character is high&lt;/li&gt;
+  &lt;li&gt;The keyboard is too small for the number of characters&lt;/li&gt;
+&lt;/ul&gt;
+
+\[[
+E = \frac{N_\text{keys}}{K_\text{avg} \cdot \max(N_\text{chars}, N_\text{keys})}
+]\]
+
+&lt;p&gt;For our case, we could assume that the average number of keystrokes is a
+function of base-k logarithm, where k is the total number of keys in the keyboard.&lt;/p&gt;
+
+\[[
+K_\text{avg} = \lceil \log_{N_\text{keys}} N_\text{chars} \rceil
+]\]
+
+&lt;p&gt;So it could mean a keyboard like this, although there’s a lot of room for
+improvement in terms of the overlay:&lt;/p&gt;
+
+&lt;video controls=&quot;&quot; width=&quot;100%&quot; loop=&quot;&quot; autoplay=&quot;&quot;&gt;
+    &lt;source src=&quot;/assets/keyboard.webm&quot; type=&quot;video/webm&quot; /&gt;
+    Your browser does not support the video tag.
+&lt;/video&gt;
+
+&lt;h2 id=&quot;comparison-to-tv-input&quot;&gt;&lt;a href=&quot;#comparison-to-tv-input&quot;&gt;&lt;/a&gt;Comparison to TV input&lt;/h2&gt;
+
+&lt;p&gt;It is not trivial to calculate the number of keystrokes required on the normal
+modes of input, like the one that’s used in most modern televisions, but it
+could be approximated based on the following assumptions:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Diagonal movement not allowed, only 4 directional&lt;/li&gt;
+  &lt;li&gt;QWERTY keyboard is used&lt;/li&gt;
+  &lt;li&gt;The keyboard position remains at the point of last input&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Based on the above assumptions, a Python script could be written to calculate
+the keystrokes taken on a TV input:&lt;/p&gt;
+
+&lt;div class=&quot;language-py scrollable-code highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;collections&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deque&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;1234567890&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;qwertyuiop&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;asdfghjkl&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;zxcvbnm&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# build position map
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;bfs_distance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;sh&quot;&gt;&quot;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;True snap-path cost between two keys&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;sr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;tr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;deque&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)])&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;visited&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;popleft&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+        &lt;span class=&quot;nf&quot;&gt;if &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;
+
+        &lt;span class=&quot;nf&quot;&gt;if &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;visited&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;continue&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;visited&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dc&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;nr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dc&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]):&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; &lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;q&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;inf&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;keystrokes_tv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;sh&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;lower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;current&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;start&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ch&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ch&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;continue&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;bfs_distance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;current&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;current&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ch&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Being at a loss for a potential dataset to compare the new decision-tree based
+system to the existing methods, I instead compare both of them with the amount
+of keystrokes required to type out some of the most popular YouTube searches
+from the previous decade. The efficiency of the new method is very obvious with
+longer queries, although this would not be that useful since it is only needed
+to type out the first few characters of a word with the advent of predictive
+completion system.&lt;/p&gt;
+
+&lt;p&gt;Notable difference still exist at smaller words:&lt;/p&gt;
+
+&lt;div style=&quot;overflow-x: scroll;max-height: 500px; margin-bottom: 15px&quot;&gt;
+
+  &lt;table&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;
+        &lt;th&gt;Search Term&lt;/th&gt;
+        &lt;th&gt;Keystrokes&lt;/th&gt;
+        &lt;th&gt;New Algorithm&lt;/th&gt;
+        &lt;th&gt;Percentage Decrease&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr&gt;
+        &lt;td&gt;BTS&lt;/td&gt;
+        &lt;td&gt;14&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;35.71%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;pewdiepie&lt;/td&gt;
+        &lt;td&gt;54&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;50.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;ASMR&lt;/td&gt;
+        &lt;td&gt;16&lt;/td&gt;
+        &lt;td&gt;12&lt;/td&gt;
+        &lt;td&gt;25.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Billie Eilish&lt;/td&gt;
+        &lt;td&gt;51&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;23.53%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;baby shark&lt;/td&gt;
+        &lt;td&gt;50&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;40.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;old town road&lt;/td&gt;
+        &lt;td&gt;67&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;41.79%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;music&lt;/td&gt;
+        &lt;td&gt;34&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;55.88%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;badabun&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;36.36%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;blackpink&lt;/td&gt;
+        &lt;td&gt;48&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;43.75%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Fortnite&lt;/td&gt;
+        &lt;td&gt;35&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;31.43%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Minecraft&lt;/td&gt;
+        &lt;td&gt;42&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;35.71%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;pewdiepie vs t series&lt;/td&gt;
+        &lt;td&gt;91&lt;/td&gt;
+        &lt;td&gt;63&lt;/td&gt;
+        &lt;td&gt;30.77%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;peliculas completas en español&lt;/td&gt;
+        &lt;td&gt;156&lt;/td&gt;
+        &lt;td&gt;90&lt;/td&gt;
+        &lt;td&gt;42.31%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;senorita&lt;/td&gt;
+        &lt;td&gt;38&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;36.84%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Ariana grande&lt;/td&gt;
+        &lt;td&gt;61&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;36.07%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;alan walker&lt;/td&gt;
+        &lt;td&gt;56&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;41.07%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;tik tok&lt;/td&gt;
+        &lt;td&gt;25&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;16.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;musica&lt;/td&gt;
+        &lt;td&gt;38&lt;/td&gt;
+        &lt;td&gt;18&lt;/td&gt;
+        &lt;td&gt;52.63%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;WWE&lt;/td&gt;
+        &lt;td&gt;6&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;-50.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Calma&lt;/td&gt;
+        &lt;td&gt;29&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;48.28%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;bad bunny&lt;/td&gt;
+        &lt;td&gt;32&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;15.62%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Eminem&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;18&lt;/td&gt;
+        &lt;td&gt;45.45%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;queen&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;28.57%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;ed Sheeran&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;9.09%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Peppa pig&lt;/td&gt;
+        &lt;td&gt;58&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;53.45%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;despacito&lt;/td&gt;
+        &lt;td&gt;50&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;46.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;la rosa de Guadalupe&lt;/td&gt;
+        &lt;td&gt;92&lt;/td&gt;
+        &lt;td&gt;60&lt;/td&gt;
+        &lt;td&gt;34.78%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Taki Taki&lt;/td&gt;
+        &lt;td&gt;42&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;35.71%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Enes Batur&lt;/td&gt;
+        &lt;td&gt;43&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;30.23%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Michael Jackson&lt;/td&gt;
+        &lt;td&gt;86&lt;/td&gt;
+        &lt;td&gt;45&lt;/td&gt;
+        &lt;td&gt;47.67%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;songs&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;37.50%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;t series&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;20.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;maluma&lt;/td&gt;
+        &lt;td&gt;40&lt;/td&gt;
+        &lt;td&gt;18&lt;/td&gt;
+        &lt;td&gt;55.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;bad guy&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;12.50%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;markiplier&lt;/td&gt;
+        &lt;td&gt;46&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;34.78%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Taylor swift&lt;/td&gt;
+        &lt;td&gt;54&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;33.33%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Ozuna&lt;/td&gt;
+        &lt;td&gt;41&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;63.41%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;nightcore&lt;/td&gt;
+        &lt;td&gt;44&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;38.64%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Paulo Londra&lt;/td&gt;
+        &lt;td&gt;59&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;38.98%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;karaoke&lt;/td&gt;
+        &lt;td&gt;46&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;54.35%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;James Charles&lt;/td&gt;
+        &lt;td&gt;69&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;43.48%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;youtube&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;30.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;imagine dragons&lt;/td&gt;
+        &lt;td&gt;75&lt;/td&gt;
+        &lt;td&gt;45&lt;/td&gt;
+        &lt;td&gt;40.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;dance monkey&lt;/td&gt;
+        &lt;td&gt;53&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;32.08%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;twice&lt;/td&gt;
+        &lt;td&gt;28&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;46.43%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Roblox&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;18&lt;/td&gt;
+        &lt;td&gt;50.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;free fire&lt;/td&gt;
+        &lt;td&gt;25&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;-8.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;gacha life&lt;/td&gt;
+        &lt;td&gt;46&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;34.78%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;post-Malone&lt;/td&gt;
+        &lt;td&gt;63&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;47.62%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Justin Bieber&lt;/td&gt;
+        &lt;td&gt;56&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;30.36%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Felipe Neto&lt;/td&gt;
+        &lt;td&gt;49&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;32.65%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Bruno mars&lt;/td&gt;
+        &lt;td&gt;46&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;34.78%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;7 rings&lt;/td&gt;
+        &lt;td&gt;31&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;32.26%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;china&lt;/td&gt;
+        &lt;td&gt;25&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;40.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Doraemon&lt;/td&gt;
+        &lt;td&gt;44&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;45.45%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;anuel&lt;/td&gt;
+        &lt;td&gt;25&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;40.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;kill this love&lt;/td&gt;
+        &lt;td&gt;57&lt;/td&gt;
+        &lt;td&gt;42&lt;/td&gt;
+        &lt;td&gt;26.32%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;jacksepticeye&lt;/td&gt;
+        &lt;td&gt;72&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;45.83%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;maroon 5&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;38.46%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Joe Rogan&lt;/td&gt;
+        &lt;td&gt;44&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;38.64%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;game of thrones&lt;/td&gt;
+        &lt;td&gt;70&lt;/td&gt;
+        &lt;td&gt;45&lt;/td&gt;
+        &lt;td&gt;35.71%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;marshmello&lt;/td&gt;
+        &lt;td&gt;51&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;41.18%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Linkin park&lt;/td&gt;
+        &lt;td&gt;57&lt;/td&gt;
+        &lt;td&gt;33&lt;/td&gt;
+        &lt;td&gt;42.11%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;David dobrik&lt;/td&gt;
+        &lt;td&gt;52&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;30.77%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;bohemian rhapsody&lt;/td&gt;
+        &lt;td&gt;108&lt;/td&gt;
+        &lt;td&gt;51&lt;/td&gt;
+        &lt;td&gt;52.78%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;squeeze&lt;/td&gt;
+        &lt;td&gt;28&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;25.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;lady gaga&lt;/td&gt;
+        &lt;td&gt;44&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;38.64%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;aaj tak live&lt;/td&gt;
+        &lt;td&gt;43&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;16.28%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;5-minute crafts&lt;/td&gt;
+        &lt;td&gt;56&lt;/td&gt;
+        &lt;td&gt;45&lt;/td&gt;
+        &lt;td&gt;19.64%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;cardi b&lt;/td&gt;
+        &lt;td&gt;29&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;27.59%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;geo news live&lt;/td&gt;
+        &lt;td&gt;54&lt;/td&gt;
+        &lt;td&gt;39&lt;/td&gt;
+        &lt;td&gt;27.78%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Selena Gomez&lt;/td&gt;
+        &lt;td&gt;62&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;41.94%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Coldplay&lt;/td&gt;
+        &lt;td&gt;50&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;52.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;dantdm&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;18&lt;/td&gt;
+        &lt;td&gt;33.33%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;lofi&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;12&lt;/td&gt;
+        &lt;td&gt;50.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;anuel aa&lt;/td&gt;
+        &lt;td&gt;35&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;31.43%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Rihanna&lt;/td&gt;
+        &lt;td&gt;35&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;40.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;drake&lt;/td&gt;
+        &lt;td&gt;26&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;42.31%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;dross&lt;/td&gt;
+        &lt;td&gt;22&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;31.82%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Los polinesios&lt;/td&gt;
+        &lt;td&gt;70&lt;/td&gt;
+        &lt;td&gt;42&lt;/td&gt;
+        &lt;td&gt;40.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;rap&lt;/td&gt;
+        &lt;td&gt;21&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;57.14%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Shawn Mendes&lt;/td&gt;
+        &lt;td&gt;48&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;25.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;cocomelon&lt;/td&gt;
+        &lt;td&gt;59&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;54.24%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;sia&lt;/td&gt;
+        &lt;td&gt;19&lt;/td&gt;
+        &lt;td&gt;9&lt;/td&gt;
+        &lt;td&gt;52.63%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;song&lt;/td&gt;
+        &lt;td&gt;20&lt;/td&gt;
+        &lt;td&gt;12&lt;/td&gt;
+        &lt;td&gt;40.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;slime&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;37.50%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;dua lipa&lt;/td&gt;
+        &lt;td&gt;43&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;44.19%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;con Calma&lt;/td&gt;
+        &lt;td&gt;48&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;43.75%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;funny videos&lt;/td&gt;
+        &lt;td&gt;54&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;33.33%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;mikecrack&lt;/td&gt;
+        &lt;td&gt;44&lt;/td&gt;
+        &lt;td&gt;27&lt;/td&gt;
+        &lt;td&gt;38.64%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;vegetta777&lt;/td&gt;
+        &lt;td&gt;38&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;21.05%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;pubg&lt;/td&gt;
+        &lt;td&gt;22&lt;/td&gt;
+        &lt;td&gt;12&lt;/td&gt;
+        &lt;td&gt;45.45%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;avengers endgame&lt;/td&gt;
+        &lt;td&gt;66&lt;/td&gt;
+        &lt;td&gt;48&lt;/td&gt;
+        &lt;td&gt;27.27%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;movies&lt;/td&gt;
+        &lt;td&gt;37&lt;/td&gt;
+        &lt;td&gt;18&lt;/td&gt;
+        &lt;td&gt;51.35%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;soolking&lt;/td&gt;
+        &lt;td&gt;26&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;7.69%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;believer&lt;/td&gt;
+        &lt;td&gt;38&lt;/td&gt;
+        &lt;td&gt;24&lt;/td&gt;
+        &lt;td&gt;36.84%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;GTA 5&lt;/td&gt;
+        &lt;td&gt;20&lt;/td&gt;
+        &lt;td&gt;15&lt;/td&gt;
+        &lt;td&gt;25.00%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Romeo Santos&lt;/td&gt;
+        &lt;td&gt;66&lt;/td&gt;
+        &lt;td&gt;36&lt;/td&gt;
+        &lt;td&gt;45.45%&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;Katy perry&lt;/td&gt;
+        &lt;td&gt;43&lt;/td&gt;
+        &lt;td&gt;30&lt;/td&gt;
+        &lt;td&gt;30.23%&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+
+&lt;/div&gt;
+
+&lt;p&gt;The code used for these calculations can be found &lt;a href=&quot;https://github.com/vetrivln/tv-keyboard-optimization&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>~vetrivln</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="blog" />
+      
+
+      
+        <category term="tech" />
+      
+
+      
+        <summary type="html">When was the last time you enjoyed typing down what you wanted on a TV with nothing but a remote? All the solutions to speeden up text input on such devices are mostly a voice recognision alternative, or something like a gaze-based detection of input. Is there a way to make typing efficient on a consumer remote that has nothing more than navigation buttons? Theoretically how could you possibly reduce the number of keystrokes to type a single character while still maintaining the keystrokes/available-keys ratio, while still not going up high the learning curve? Employing a decision-tree based input method might help here. For the sake of simplicity, let us assume that we still retain our existing QWERTY keyboard with 4 rows, (alphabets and numbers, symbols excluded). And that the first keystroke is spent to select one among those 4 rows. If we allow a maximum choice of 12 inputs from a single row, that covers most of the punctuation used in English— :;&amp;lt;,&amp;gt;.?/_-+={}[]&quot;&apos;?/. 12, because it is a factor of 4, and each of the arrow keys could easily be assigned a equal number of characters. So the second input narrows the selection down to 3 adjacent characters, and the third input could finalize the choice of the key pressed. Sounds good, but how well does this fare? By the standards of the metric we just invented (totally scientific!), we map 45 characters to 4 keys to a combination of 3 keystrokes. We want efficiency to decrease if either: The average keystrokes per character is high The keyboard is too small for the number of characters \[[ E = \frac{N_\text{keys}}{K_\text{avg} \cdot \max(N_\text{chars}, N_\text{keys})} ]\] For our case, we could assume that the average number of keystrokes is a function of base-k logarithm, where k is the total number of keys in the keyboard. \[[ K_\text{avg} = \lceil \log_{N_\text{keys}} N_\text{chars} \rceil ]\] So it could mean a keyboard like this, although there’s a lot of room for improvement in terms of the overlay: Your browser does not support the video tag. Comparison to TV input It is not trivial to calculate the number of keystrokes required on the normal modes of input, like the one that’s used in most modern televisions, but it could be approximated based on the following assumptions: Diagonal movement not allowed, only 4 directional QWERTY keyboard is used The keyboard position remains at the point of last input Based on the above assumptions, a Python script could be written to calculate the keystrokes taken on a TV input: from collections import deque layout = [ list(&quot;1234567890&quot;), list(&quot;qwertyuiop&quot;), list(&quot;asdfghjkl&quot;), list(&quot;zxcvbnm&quot;) ] # build position map pos = {} for r in range(len(layout)): for c in range(len(layout[r])): pos[layout[r][c]] = (r, c) def bfs_distance(a, b): &quot;&quot;&quot;True snap-path cost between two keys&quot;&quot;&quot; if a == b: return 0 sr, sc = pos[a] tr, tc = pos[b] q = deque([(sr, sc, 0)]) visited = set() while q: r, c, d = q.popleft() if (r, c) == (tr, tc): return d if (r, c) in visited: continue visited.add((r, c)) for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]: nr, nc = r + dr, c + dc if 0 &amp;lt;= nr &amp;lt; len(layout) and 0 &amp;lt;= nc &amp;lt; len(layout[nr]): if layout[nr][nc] != &quot; &quot;: q.append((nr, nc, d + 1)) return float(&quot;inf&quot;) def keystrokes_tv(text, start=&apos;a&apos;): text = text.lower() current = start total = 0 for ch in text: if ch not in pos: continue total += bfs_distance(current, ch) total += 1 current = ch return total Being at a loss for a potential dataset to compare the new decision-tree based system to the existing methods, I instead compare both of them with the amount of keystrokes required to type out some of the most popular YouTube searches from the previous decade. The efficiency of the new method is very obvious with longer queries, although this would not be that useful since it is only needed to type out the first few characters of a word with the advent of predictive completion system. Notable difference still exist at smaller words: Search Term Keystrokes New Algorithm Percentage Decrease BTS 14 9 35.71% pewdiepie 54 27 50.00% ASMR 16 12 25.00% Billie Eilish 51 39 23.53% baby shark 50 30 40.00% old town road 67 39 41.79% music 34 15 55.88% badabun 33 21 36.36% blackpink 48 27 43.75% Fortnite 35 24 31.43% Minecraft 42 27 35.71% pewdiepie vs t series 91 63 30.77% peliculas completas en español 156 90 42.31% senorita 38 24 36.84% Ariana grande 61 39 36.07% alan walker 56 33 41.07% tik tok 25 21 16.00% musica 38 18 52.63% WWE 6 9 -50.00% Calma 29 15 48.28% bad bunny 32 27 15.62% Eminem 33 18 45.45% queen 21 15 28.57% ed Sheeran 33 30 9.09% Peppa pig 58 27 53.45% despacito 50 27 46.00% la rosa de Guadalupe 92 60 34.78% Taki Taki 42 27 35.71% Enes Batur 43 30 30.23% Michael Jackson 86 45 47.67% songs 24 15 37.50% t series 30 24 20.00% maluma 40 18 55.00% bad guy 24 21 12.50% markiplier 46 30 34.78% Taylor swift 54 36 33.33% Ozuna 41 15 63.41% nightcore 44 27 38.64% Paulo Londra 59 36 38.98% karaoke 46 21 54.35% James Charles 69 39 43.48% youtube 30 21 30.00% imagine dragons 75 45 40.00% dance monkey 53 36 32.08% twice 28 15 46.43% Roblox 36 18 50.00% free fire 25 27 -8.00% gacha life 46 30 34.78% post-Malone 63 33 47.62% Justin Bieber 56 39 30.36% Felipe Neto 49 33 32.65% Bruno mars 46 30 34.78% 7 rings 31 21 32.26% china 25 15 40.00% Doraemon 44 24 45.45% anuel 25 15 40.00% kill this love 57 42 26.32% jacksepticeye 72 39 45.83% maroon 5 39 24 38.46% Joe Rogan 44 27 38.64% game of thrones 70 45 35.71% marshmello 51 30 41.18% Linkin park 57 33 42.11% David dobrik 52 36 30.77% bohemian rhapsody 108 51 52.78% squeeze 28 21 25.00% lady gaga 44 27 38.64% aaj tak live 43 36 16.28% 5-minute crafts 56 45 19.64% cardi b 29 21 27.59% geo news live 54 39 27.78% Selena Gomez 62 36 41.94% Coldplay 50 24 52.00% dantdm 27 18 33.33% lofi 24 12 50.00% anuel aa 35 24 31.43% Rihanna 35 21 40.00% drake 26 15 42.31% dross 22 15 31.82% Los polinesios 70 42 40.00% rap 21 9 57.14% Shawn Mendes 48 36 25.00% cocomelon 59 27 54.24% sia 19 9 52.63% song 20 12 40.00% slime 24 15 37.50% dua lipa 43 24 44.19% con Calma 48 27 43.75% funny videos 54 36 33.33% mikecrack 44 27 38.64% vegetta777 38 30 21.05% pubg 22 12 45.45% avengers endgame 66 48 27.27% movies 37 18 51.35% soolking 26 24 7.69% believer 38 24 36.84% GTA 5 20 15 25.00% Romeo Santos 66 36 45.45% Katy perry 43 30 30.23% The code used for these calculations can be found here.</summary>
+      
+
+      
+      
+    </entry>
+  
   
   
     <entry>

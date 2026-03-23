@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Better ways to type on a &lt;5% Keyboard</title>
+  <meta name="description" content="When was the last time you enjoyed typing down what you wanted on a TV with nothing but a remote? All the solutions to speeden up text input on such devices are mostly a voice recognision alternative, or something like a gaze-based detection of input. Is there a way to make typing efficient on a consumer remote that has nothing more than navigation buttons? Theoretically how could you possibly reduce the number of keystrokes to type a single character while still maintaining the keystrokes/available-keys ratio, while still not going up high the learning curve? Employing a decision-tree based input method might help here. For the sake of simplicity, let us assume that we still retain our existing QWERTY keyboard with 4 rows, (alphabets and numbers, symbols excluded). And that the first keystroke is spent to select one among those 4 rows. If we allow a maximum choice of 12 inputs from a single row, that covers most of the punctuation used in English— :;&amp;lt;,&amp;gt;.?/_-+={}[]&quot;&#39;?/. 12, because it is a factor of 4, and each of the arrow keys could easily be assigned a equal number of characters. So the second input narrows the selection down to 3 adjacent characters, and the third input could finalize the choice of the key pressed. Sounds good, but how well does this fare? By the standards of the metric we just invented (totally scientific!), we map 45 characters to 4 keys to a combination of 3 keystrokes. We want efficiency to decrease if either: The average keystrokes per character is high The keyboard is too small for the number of characters \[[ E = \frac{N_\text{keys}}{K_\text{avg} \cdot \max(N_\text{chars}, N_\text{keys})} ]\] For our case, we could assume that the average number of keystrokes is a function of base-k logarithm, where k is the total number of keys in the keyboard. \[[ K_\text{avg} = \lceil \log_{N_\text{keys}} N_\text{chars} \rceil ]\] So it could mean a keyboard like this, although there’s a lot of room for improvement in terms of the overlay: Your browser does not support the video tag. Comparison to TV input It is not trivial to calculate the number of keystrokes required on the normal modes of input, like the one that’s used in most modern televisions, but it could be approximated based on the following assumptions: Diagonal movement not allowed, only 4 directional QWERTY keyboard is used The keyboard position remains at the point of last input Based on the above assumptions, a Python script could be written to calculate the keystrokes taken on a TV input: from collections import deque layout = [ list(&quot;1234567890&quot;), list(&quot;qwertyuiop&quot;), list(&quot;asdfghjkl&quot;), list(&quot;zxcvbnm&quot;) ] # build position map pos = {} for r in range(len(layout)): for c in range(len(layout[r])): pos[layout[r][c]] = (r, c) def bfs_distance(a, b): &quot;&quot;&quot;True snap-path cost between two keys&quot;&quot;&quot; if a == b: return 0 sr, sc = pos[a] tr, tc = pos[b] q = deque([(sr, sc, 0)]) visited = set() while q: r, c, d = q.popleft() if (r, c) == (tr, tc): return d if (r, c) in visited: continue visited.add((r, c)) for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]: nr, nc = r + dr, c + dc if 0 &amp;lt;= nr &amp;lt; len(layout) and 0 &amp;lt;= nc &amp;lt; len(layout[nr]): if layout[nr][nc] != &quot; &quot;: q.append((nr, nc, d + 1)) return float(&quot;inf&quot;) def keystrokes_tv(text, start=&#39;a&#39;): text = text.lower() current = start total = 0 for ch in text: if ch not in pos: continue total += bfs_distance(current, ch) total += 1 current = ch return total Being at a loss for a potential dataset to compare the new decision-tree based system to the existing methods, I instead compare both of them with the amount of keystrokes required to type out some of the most popular YouTube searches from the previous decade. The efficiency of the new method is very obvious with longer queries, although this would not be that useful since it is only needed to type out the first few characters of a word with the advent of predictive completion system. Notable difference still exist at smaller words: Search Term Keystrokes New Algorithm Percentage Decrease BTS 14 9 35.71% pewdiepie 54 27 50.00% ASMR 16 12 25.00% Billie Eilish 51 39 23.53% baby shark 50 30 40.00% old town road 67 39 41.79% music 34 15 55.88% badabun 33 21 36.36% blackpink 48 27 43.75% Fortnite 35 24 31.43% Minecraft 42 27 35.71% pewdiepie vs t series 91 63 30.77% peliculas completas en español 156 90 42.31% senorita 38 24 36.84% Ariana grande 61 39 36.07% alan walker 56 33 41.07% tik tok 25 21 16.00% musica 38 18 52.63% WWE 6 9 -50.00% Calma 29 15 48.28% bad bunny 32 27 15.62% Eminem 33 18 45.45% queen 21 15 28.57% ed Sheeran 33 30 9.09% Peppa pig 58 27 53.45% despacito 50 27 46.00% la rosa de Guadalupe 92 60 34.78% Taki Taki 42 27 35.71% Enes Batur 43 30 30.23% Michael Jackson 86 45 47.67% songs 24 15 37.50% t series 30 24 20.00% maluma 40 18 55.00% bad guy 24 21 12.50% markiplier 46 30 34.78% Taylor swift 54 36 33.33% Ozuna 41 15 63.41% nightcore 44 27 38.64% Paulo Londra 59 36 38.98% karaoke 46 21 54.35% James Charles 69 39 43.48% youtube 30 21 30.00% imagine dragons 75 45 40.00% dance monkey 53 36 32.08% twice 28 15 46.43% Roblox 36 18 50.00% free fire 25 27 -8.00% gacha life 46 30 34.78% post-Malone 63 33 47.62% Justin Bieber 56 39 30.36% Felipe Neto 49 33 32.65% Bruno mars 46 30 34.78% 7 rings 31 21 32.26% china 25 15 40.00% Doraemon 44 24 45.45% anuel 25 15 40.00% kill this love 57 42 26.32% jacksepticeye 72 39 45.83% maroon 5 39 24 38.46% Joe Rogan 44 27 38.64% game of thrones 70 45 35.71% marshmello 51 30 41.18% Linkin park 57 33 42.11% David dobrik 52 36 30.77% bohemian rhapsody 108 51 52.78% squeeze 28 21 25.00% lady gaga 44 27 38.64% aaj tak live 43 36 16.28% 5-minute crafts 56 45 19.64% cardi b 29 21 27.59% geo news live 54 39 27.78% Selena Gomez 62 36 41.94% Coldplay 50 24 52.00% dantdm 27 18 33.33% lofi 24 12 50.00% anuel aa 35 24 31.43% Rihanna 35 21 40.00% drake 26 15 42.31% dross 22 15 31.82% Los polinesios 70 42 40.00% rap 21 9 57.14% Shawn Mendes 48 36 25.00% cocomelon 59 27 54.24% sia 19 9 52.63% song 20 12 40.00% slime 24 15 37.50% dua lipa 43 24 44.19% con Calma 48 27 43.75% funny videos 54 36 33.33% mikecrack 44 27 38.64% vegetta777 38 30 21.05% pubg 22 12 45.45% avengers endgame 66 48 27.27% movies 37 18 51.35% soolking 26 24 7.69% believer 38 24 36.84% GTA 5 20 15 25.00% Romeo Santos 66 36 45.45% Katy perry 43 30 30.23% The code used for these calculations can be found here.">
+  
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="http://localhost:4000/2026/03/22/better-input-methods/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="Bird Ideas" href="http://localhost:4000/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Better ways to type on a &lt;5% Keyboard">
+  <meta property="og:site_name" content="Bird Ideas">
+  <meta property="og:url" content="http://localhost:4000/2026/03/22/better-input-methods/">
+  <meta property="og:description" content="When was the last time you enjoyed typing down what you wanted on a TV with nothing but a remote? All the solutions to speeden up text input on such devices are mostly a voice recognision alternative, or something like a gaze-based detection of input. Is there a way to make typing efficient on a consumer remote that has nothing more than navigation buttons? Theoretically how could you possibly reduce the number of keystrokes to type a single character while still maintaining the keystrokes/available-keys ratio, while still not going up high the learning curve? Employing a decision-tree based input method might help here. For the sake of simplicity, let us assume that we still retain our existing QWERTY keyboard with 4 rows, (alphabets and numbers, symbols excluded). And that the first keystroke is spent to select one among those 4 rows. If we allow a maximum choice of 12 inputs from a single row, that covers most of the punctuation used in English— :;&amp;lt;,&amp;gt;.?/_-+={}[]&quot;&#39;?/. 12, because it is a factor of 4, and each of the arrow keys could easily be assigned a equal number of characters. So the second input narrows the selection down to 3 adjacent characters, and the third input could finalize the choice of the key pressed. Sounds good, but how well does this fare? By the standards of the metric we just invented (totally scientific!), we map 45 characters to 4 keys to a combination of 3 keystrokes. We want efficiency to decrease if either: The average keystrokes per character is high The keyboard is too small for the number of characters \[[ E = \frac{N_\text{keys}}{K_\text{avg} \cdot \max(N_\text{chars}, N_\text{keys})} ]\] For our case, we could assume that the average number of keystrokes is a function of base-k logarithm, where k is the total number of keys in the keyboard. \[[ K_\text{avg} = \lceil \log_{N_\text{keys}} N_\text{chars} \rceil ]\] So it could mean a keyboard like this, although there’s a lot of room for improvement in terms of the overlay: Your browser does not support the video tag. Comparison to TV input It is not trivial to calculate the number of keystrokes required on the normal modes of input, like the one that’s used in most modern televisions, but it could be approximated based on the following assumptions: Diagonal movement not allowed, only 4 directional QWERTY keyboard is used The keyboard position remains at the point of last input Based on the above assumptions, a Python script could be written to calculate the keystrokes taken on a TV input: from collections import deque layout = [ list(&quot;1234567890&quot;), list(&quot;qwertyuiop&quot;), list(&quot;asdfghjkl&quot;), list(&quot;zxcvbnm&quot;) ] # build position map pos = {} for r in range(len(layout)): for c in range(len(layout[r])): pos[layout[r][c]] = (r, c) def bfs_distance(a, b): &quot;&quot;&quot;True snap-path cost between two keys&quot;&quot;&quot; if a == b: return 0 sr, sc = pos[a] tr, tc = pos[b] q = deque([(sr, sc, 0)]) visited = set() while q: r, c, d = q.popleft() if (r, c) == (tr, tc): return d if (r, c) in visited: continue visited.add((r, c)) for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]: nr, nc = r + dr, c + dc if 0 &amp;lt;= nr &amp;lt; len(layout) and 0 &amp;lt;= nc &amp;lt; len(layout[nr]): if layout[nr][nc] != &quot; &quot;: q.append((nr, nc, d + 1)) return float(&quot;inf&quot;) def keystrokes_tv(text, start=&#39;a&#39;): text = text.lower() current = start total = 0 for ch in text: if ch not in pos: continue total += bfs_distance(current, ch) total += 1 current = ch return total Being at a loss for a potential dataset to compare the new decision-tree based system to the existing methods, I instead compare both of them with the amount of keystrokes required to type out some of the most popular YouTube searches from the previous decade. The efficiency of the new method is very obvious with longer queries, although this would not be that useful since it is only needed to type out the first few characters of a word with the advent of predictive completion system. Notable difference still exist at smaller words: Search Term Keystrokes New Algorithm Percentage Decrease BTS 14 9 35.71% pewdiepie 54 27 50.00% ASMR 16 12 25.00% Billie Eilish 51 39 23.53% baby shark 50 30 40.00% old town road 67 39 41.79% music 34 15 55.88% badabun 33 21 36.36% blackpink 48 27 43.75% Fortnite 35 24 31.43% Minecraft 42 27 35.71% pewdiepie vs t series 91 63 30.77% peliculas completas en español 156 90 42.31% senorita 38 24 36.84% Ariana grande 61 39 36.07% alan walker 56 33 41.07% tik tok 25 21 16.00% musica 38 18 52.63% WWE 6 9 -50.00% Calma 29 15 48.28% bad bunny 32 27 15.62% Eminem 33 18 45.45% queen 21 15 28.57% ed Sheeran 33 30 9.09% Peppa pig 58 27 53.45% despacito 50 27 46.00% la rosa de Guadalupe 92 60 34.78% Taki Taki 42 27 35.71% Enes Batur 43 30 30.23% Michael Jackson 86 45 47.67% songs 24 15 37.50% t series 30 24 20.00% maluma 40 18 55.00% bad guy 24 21 12.50% markiplier 46 30 34.78% Taylor swift 54 36 33.33% Ozuna 41 15 63.41% nightcore 44 27 38.64% Paulo Londra 59 36 38.98% karaoke 46 21 54.35% James Charles 69 39 43.48% youtube 30 21 30.00% imagine dragons 75 45 40.00% dance monkey 53 36 32.08% twice 28 15 46.43% Roblox 36 18 50.00% free fire 25 27 -8.00% gacha life 46 30 34.78% post-Malone 63 33 47.62% Justin Bieber 56 39 30.36% Felipe Neto 49 33 32.65% Bruno mars 46 30 34.78% 7 rings 31 21 32.26% china 25 15 40.00% Doraemon 44 24 45.45% anuel 25 15 40.00% kill this love 57 42 26.32% jacksepticeye 72 39 45.83% maroon 5 39 24 38.46% Joe Rogan 44 27 38.64% game of thrones 70 45 35.71% marshmello 51 30 41.18% Linkin park 57 33 42.11% David dobrik 52 36 30.77% bohemian rhapsody 108 51 52.78% squeeze 28 21 25.00% lady gaga 44 27 38.64% aaj tak live 43 36 16.28% 5-minute crafts 56 45 19.64% cardi b 29 21 27.59% geo news live 54 39 27.78% Selena Gomez 62 36 41.94% Coldplay 50 24 52.00% dantdm 27 18 33.33% lofi 24 12 50.00% anuel aa 35 24 31.43% Rihanna 35 21 40.00% drake 26 15 42.31% dross 22 15 31.82% Los polinesios 70 42 40.00% rap 21 9 57.14% Shawn Mendes 48 36 25.00% cocomelon 59 27 54.24% sia 19 9 52.63% song 20 12 40.00% slime 24 15 37.50% dua lipa 43 24 44.19% con Calma 48 27 43.75% funny videos 54 36 33.33% mikecrack 44 27 38.64% vegetta777 38 30 21.05% pubg 22 12 45.45% avengers endgame 66 48 27.27% movies 37 18 51.35% soolking 26 24 7.69% believer 38 24 36.84% GTA 5 20 15 25.00% Romeo Santos 66 36 45.45% Katy perry 43 30 30.23% The code used for these calculations can be found here.">
+  
+  
+  <meta name="twitter:card" content="summary">
+  
+  <meta name="twitter:title" content="Better ways to type on a &lt;5% Keyboard">
+  <meta name="twitter:description" content="When was the last time you enjoyed typing down what you wanted on a TV with nothing but a remote? All the solutions to speeden up text input on such devices are mostly a voice recognision alternati...">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Bird Ideas</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/cv/">About</a>
+      
+        
+        <a class="page-link" href="/archives/">Archives</a>
+      
+        
+        <a class="page-link" href="https://github.com/vetrivln">GitHub</a>
+      
+        
+        <a class="page-link" href="https://remembermay2009.com">🐅</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Better ways to type on a &lt;5% Keyboard</h1>
+    
+    <p class="post-meta"><time datetime="2026-03-22T00:00:00+00:00" itemprop="datePublished">Mar 22, 2026</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/blog/">blog</a>
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+        <a href="/tags/tech/">tech</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <script>
+  MathJax = {
+    options: {
+      enableMenu: false
+    }
+  };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<p>When was the last time you enjoyed typing down what you wanted on a TV with
+nothing but a remote? All the solutions to speeden up text input on such devices
+are mostly a voice recognision alternative, or something like a gaze-based
+detection of input.</p>
+
+<p>Is there a way to make typing efficient on a consumer remote that has nothing more
+than navigation buttons?</p>
+
+<p>Theoretically how could you possibly reduce the number of keystrokes to type a
+single character while still maintaining the keystrokes/available-keys ratio,
+while still not going up high the learning curve? Employing a decision-tree
+based input method might help here.</p>
+
+<p>For the sake of simplicity, let us assume that we still retain our existing
+QWERTY keyboard with 4 rows, (alphabets and numbers, symbols excluded). And that
+the first keystroke is spent to select one among those 4 rows.</p>
+
+<p>If we allow a maximum choice of 12 inputs from a single row, that covers most of
+the punctuation used in English— <code class="language-plaintext highlighter-rouge">:;&lt;,&gt;.?/_-+={}[]"'?/</code>. 12, because it is a
+factor of 4, and each of the arrow keys could easily be assigned a equal number
+of characters.</p>
+
+<p>So the second input narrows the selection down to 3 adjacent characters, and the
+third input could finalize the choice of the key pressed. Sounds good, but how
+well does this fare?</p>
+
+<p>By the standards of the metric we just invented (totally scientific!), we map 45
+characters to 4 keys to a combination of 3 keystrokes.</p>
+
+<p>We want <strong>efficiency to decrease</strong> if either:</p>
+
+<ul>
+  <li>The average keystrokes per character is high</li>
+  <li>The keyboard is too small for the number of characters</li>
+</ul>
+
+\[[
+E = \frac{N_\text{keys}}{K_\text{avg} \cdot \max(N_\text{chars}, N_\text{keys})}
+]\]
+
+<p>For our case, we could assume that the average number of keystrokes is a
+function of base-k logarithm, where k is the total number of keys in the keyboard.</p>
+
+\[[
+K_\text{avg} = \lceil \log_{N_\text{keys}} N_\text{chars} \rceil
+]\]
+
+<p>So it could mean a keyboard like this, although there’s a lot of room for
+improvement in terms of the overlay:</p>
+
+<video controls="" width="100%" loop="" autoplay="">
+    <source src="/assets/keyboard.webm" type="video/webm" />
+    Your browser does not support the video tag.
+</video>
+
+<h2 id="comparison-to-tv-input"><a href="#comparison-to-tv-input"></a>Comparison to TV input</h2>
+
+<p>It is not trivial to calculate the number of keystrokes required on the normal
+modes of input, like the one that’s used in most modern televisions, but it
+could be approximated based on the following assumptions:</p>
+
+<ul>
+  <li>Diagonal movement not allowed, only 4 directional</li>
+  <li>QWERTY keyboard is used</li>
+  <li>The keyboard position remains at the point of last input</li>
+</ul>
+
+<p>Based on the above assumptions, a Python script could be written to calculate
+the keystrokes taken on a TV input:</p>
+
+<div class="language-py scrollable-code highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+
+<span class="n">layout</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nf">list</span><span class="p">(</span><span class="sh">"</span><span class="s">1234567890</span><span class="sh">"</span><span class="p">),</span>
+    <span class="nf">list</span><span class="p">(</span><span class="sh">"</span><span class="s">qwertyuiop</span><span class="sh">"</span><span class="p">),</span>
+    <span class="nf">list</span><span class="p">(</span><span class="sh">"</span><span class="s">asdfghjkl</span><span class="sh">"</span><span class="p">),</span>
+    <span class="nf">list</span><span class="p">(</span><span class="sh">"</span><span class="s">zxcvbnm</span><span class="sh">"</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># build position map
+</span><span class="n">pos</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">layout</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">layout</span><span class="p">[</span><span class="n">r</span><span class="p">])):</span>
+        <span class="n">pos</span><span class="p">[</span><span class="n">layout</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">bfs_distance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">True snap-path cost between two keys</span><span class="sh">"""</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">sr</span><span class="p">,</span> <span class="n">sc</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+    <span class="n">tr</span><span class="p">,</span> <span class="n">tc</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">b</span><span class="p">]</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="nf">deque</span><span class="p">([(</span><span class="n">sr</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+    <span class="n">visited</span> <span class="o">=</span> <span class="nf">set</span><span class="p">()</span>
+
+    <span class="k">while</span> <span class="n">q</span><span class="p">:</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">q</span><span class="p">.</span><span class="nf">popleft</span><span class="p">()</span>
+
+        <span class="nf">if </span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">tr</span><span class="p">,</span> <span class="n">tc</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">d</span>
+
+        <span class="nf">if </span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">visited</span><span class="p">.</span><span class="nf">add</span><span class="p">((</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">dr</span><span class="p">,</span> <span class="n">dc</span> <span class="ow">in</span> <span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)]:</span>
+            <span class="n">nr</span><span class="p">,</span> <span class="n">nc</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="n">dr</span><span class="p">,</span> <span class="n">c</span> <span class="o">+</span> <span class="n">dc</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">nr</span> <span class="o">&lt;</span> <span class="nf">len</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">nc</span> <span class="o">&lt;</span> <span class="nf">len</span><span class="p">(</span><span class="n">layout</span><span class="p">[</span><span class="n">nr</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">layout</span><span class="p">[</span><span class="n">nr</span><span class="p">][</span><span class="n">nc</span><span class="p">]</span> <span class="o">!=</span> <span class="sh">"</span><span class="s"> </span><span class="sh">"</span><span class="p">:</span>
+                    <span class="n">q</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span><span class="n">nr</span><span class="p">,</span> <span class="n">nc</span><span class="p">,</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="nf">float</span><span class="p">(</span><span class="sh">"</span><span class="s">inf</span><span class="sh">"</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">keystrokes_tv</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="sh">'</span><span class="s">a</span><span class="sh">'</span><span class="p">):</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">.</span><span class="nf">lower</span><span class="p">()</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="n">start</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">total</span> <span class="o">+=</span> <span class="nf">bfs_distance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">ch</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">ch</span>
+
+    <span class="k">return</span> <span class="n">total</span>
+</code></pre></div></div>
+
+<p>Being at a loss for a potential dataset to compare the new decision-tree based
+system to the existing methods, I instead compare both of them with the amount
+of keystrokes required to type out some of the most popular YouTube searches
+from the previous decade. The efficiency of the new method is very obvious with
+longer queries, although this would not be that useful since it is only needed
+to type out the first few characters of a word with the advent of predictive
+completion system.</p>
+
+<p>Notable difference still exist at smaller words:</p>
+
+<div style="overflow-x: scroll;max-height: 500px; margin-bottom: 15px">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Search Term</th>
+        <th>Keystrokes</th>
+        <th>New Algorithm</th>
+        <th>Percentage Decrease</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>BTS</td>
+        <td>14</td>
+        <td>9</td>
+        <td>35.71%</td>
+      </tr>
+      <tr>
+        <td>pewdiepie</td>
+        <td>54</td>
+        <td>27</td>
+        <td>50.00%</td>
+      </tr>
+      <tr>
+        <td>ASMR</td>
+        <td>16</td>
+        <td>12</td>
+        <td>25.00%</td>
+      </tr>
+      <tr>
+        <td>Billie Eilish</td>
+        <td>51</td>
+        <td>39</td>
+        <td>23.53%</td>
+      </tr>
+      <tr>
+        <td>baby shark</td>
+        <td>50</td>
+        <td>30</td>
+        <td>40.00%</td>
+      </tr>
+      <tr>
+        <td>old town road</td>
+        <td>67</td>
+        <td>39</td>
+        <td>41.79%</td>
+      </tr>
+      <tr>
+        <td>music</td>
+        <td>34</td>
+        <td>15</td>
+        <td>55.88%</td>
+      </tr>
+      <tr>
+        <td>badabun</td>
+        <td>33</td>
+        <td>21</td>
+        <td>36.36%</td>
+      </tr>
+      <tr>
+        <td>blackpink</td>
+        <td>48</td>
+        <td>27</td>
+        <td>43.75%</td>
+      </tr>
+      <tr>
+        <td>Fortnite</td>
+        <td>35</td>
+        <td>24</td>
+        <td>31.43%</td>
+      </tr>
+      <tr>
+        <td>Minecraft</td>
+        <td>42</td>
+        <td>27</td>
+        <td>35.71%</td>
+      </tr>
+      <tr>
+        <td>pewdiepie vs t series</td>
+        <td>91</td>
+        <td>63</td>
+        <td>30.77%</td>
+      </tr>
+      <tr>
+        <td>peliculas completas en español</td>
+        <td>156</td>
+        <td>90</td>
+        <td>42.31%</td>
+      </tr>
+      <tr>
+        <td>senorita</td>
+        <td>38</td>
+        <td>24</td>
+        <td>36.84%</td>
+      </tr>
+      <tr>
+        <td>Ariana grande</td>
+        <td>61</td>
+        <td>39</td>
+        <td>36.07%</td>
+      </tr>
+      <tr>
+        <td>alan walker</td>
+        <td>56</td>
+        <td>33</td>
+        <td>41.07%</td>
+      </tr>
+      <tr>
+        <td>tik tok</td>
+        <td>25</td>
+        <td>21</td>
+        <td>16.00%</td>
+      </tr>
+      <tr>
+        <td>musica</td>
+        <td>38</td>
+        <td>18</td>
+        <td>52.63%</td>
+      </tr>
+      <tr>
+        <td>WWE</td>
+        <td>6</td>
+        <td>9</td>
+        <td>-50.00%</td>
+      </tr>
+      <tr>
+        <td>Calma</td>
+        <td>29</td>
+        <td>15</td>
+        <td>48.28%</td>
+      </tr>
+      <tr>
+        <td>bad bunny</td>
+        <td>32</td>
+        <td>27</td>
+        <td>15.62%</td>
+      </tr>
+      <tr>
+        <td>Eminem</td>
+        <td>33</td>
+        <td>18</td>
+        <td>45.45%</td>
+      </tr>
+      <tr>
+        <td>queen</td>
+        <td>21</td>
+        <td>15</td>
+        <td>28.57%</td>
+      </tr>
+      <tr>
+        <td>ed Sheeran</td>
+        <td>33</td>
+        <td>30</td>
+        <td>9.09%</td>
+      </tr>
+      <tr>
+        <td>Peppa pig</td>
+        <td>58</td>
+        <td>27</td>
+        <td>53.45%</td>
+      </tr>
+      <tr>
+        <td>despacito</td>
+        <td>50</td>
+        <td>27</td>
+        <td>46.00%</td>
+      </tr>
+      <tr>
+        <td>la rosa de Guadalupe</td>
+        <td>92</td>
+        <td>60</td>
+        <td>34.78%</td>
+      </tr>
+      <tr>
+        <td>Taki Taki</td>
+        <td>42</td>
+        <td>27</td>
+        <td>35.71%</td>
+      </tr>
+      <tr>
+        <td>Enes Batur</td>
+        <td>43</td>
+        <td>30</td>
+        <td>30.23%</td>
+      </tr>
+      <tr>
+        <td>Michael Jackson</td>
+        <td>86</td>
+        <td>45</td>
+        <td>47.67%</td>
+      </tr>
+      <tr>
+        <td>songs</td>
+        <td>24</td>
+        <td>15</td>
+        <td>37.50%</td>
+      </tr>
+      <tr>
+        <td>t series</td>
+        <td>30</td>
+        <td>24</td>
+        <td>20.00%</td>
+      </tr>
+      <tr>
+        <td>maluma</td>
+        <td>40</td>
+        <td>18</td>
+        <td>55.00%</td>
+      </tr>
+      <tr>
+        <td>bad guy</td>
+        <td>24</td>
+        <td>21</td>
+        <td>12.50%</td>
+      </tr>
+      <tr>
+        <td>markiplier</td>
+        <td>46</td>
+        <td>30</td>
+        <td>34.78%</td>
+      </tr>
+      <tr>
+        <td>Taylor swift</td>
+        <td>54</td>
+        <td>36</td>
+        <td>33.33%</td>
+      </tr>
+      <tr>
+        <td>Ozuna</td>
+        <td>41</td>
+        <td>15</td>
+        <td>63.41%</td>
+      </tr>
+      <tr>
+        <td>nightcore</td>
+        <td>44</td>
+        <td>27</td>
+        <td>38.64%</td>
+      </tr>
+      <tr>
+        <td>Paulo Londra</td>
+        <td>59</td>
+        <td>36</td>
+        <td>38.98%</td>
+      </tr>
+      <tr>
+        <td>karaoke</td>
+        <td>46</td>
+        <td>21</td>
+        <td>54.35%</td>
+      </tr>
+      <tr>
+        <td>James Charles</td>
+        <td>69</td>
+        <td>39</td>
+        <td>43.48%</td>
+      </tr>
+      <tr>
+        <td>youtube</td>
+        <td>30</td>
+        <td>21</td>
+        <td>30.00%</td>
+      </tr>
+      <tr>
+        <td>imagine dragons</td>
+        <td>75</td>
+        <td>45</td>
+        <td>40.00%</td>
+      </tr>
+      <tr>
+        <td>dance monkey</td>
+        <td>53</td>
+        <td>36</td>
+        <td>32.08%</td>
+      </tr>
+      <tr>
+        <td>twice</td>
+        <td>28</td>
+        <td>15</td>
+        <td>46.43%</td>
+      </tr>
+      <tr>
+        <td>Roblox</td>
+        <td>36</td>
+        <td>18</td>
+        <td>50.00%</td>
+      </tr>
+      <tr>
+        <td>free fire</td>
+        <td>25</td>
+        <td>27</td>
+        <td>-8.00%</td>
+      </tr>
+      <tr>
+        <td>gacha life</td>
+        <td>46</td>
+        <td>30</td>
+        <td>34.78%</td>
+      </tr>
+      <tr>
+        <td>post-Malone</td>
+        <td>63</td>
+        <td>33</td>
+        <td>47.62%</td>
+      </tr>
+      <tr>
+        <td>Justin Bieber</td>
+        <td>56</td>
+        <td>39</td>
+        <td>30.36%</td>
+      </tr>
+      <tr>
+        <td>Felipe Neto</td>
+        <td>49</td>
+        <td>33</td>
+        <td>32.65%</td>
+      </tr>
+      <tr>
+        <td>Bruno mars</td>
+        <td>46</td>
+        <td>30</td>
+        <td>34.78%</td>
+      </tr>
+      <tr>
+        <td>7 rings</td>
+        <td>31</td>
+        <td>21</td>
+        <td>32.26%</td>
+      </tr>
+      <tr>
+        <td>china</td>
+        <td>25</td>
+        <td>15</td>
+        <td>40.00%</td>
+      </tr>
+      <tr>
+        <td>Doraemon</td>
+        <td>44</td>
+        <td>24</td>
+        <td>45.45%</td>
+      </tr>
+      <tr>
+        <td>anuel</td>
+        <td>25</td>
+        <td>15</td>
+        <td>40.00%</td>
+      </tr>
+      <tr>
+        <td>kill this love</td>
+        <td>57</td>
+        <td>42</td>
+        <td>26.32%</td>
+      </tr>
+      <tr>
+        <td>jacksepticeye</td>
+        <td>72</td>
+        <td>39</td>
+        <td>45.83%</td>
+      </tr>
+      <tr>
+        <td>maroon 5</td>
+        <td>39</td>
+        <td>24</td>
+        <td>38.46%</td>
+      </tr>
+      <tr>
+        <td>Joe Rogan</td>
+        <td>44</td>
+        <td>27</td>
+        <td>38.64%</td>
+      </tr>
+      <tr>
+        <td>game of thrones</td>
+        <td>70</td>
+        <td>45</td>
+        <td>35.71%</td>
+      </tr>
+      <tr>
+        <td>marshmello</td>
+        <td>51</td>
+        <td>30</td>
+        <td>41.18%</td>
+      </tr>
+      <tr>
+        <td>Linkin park</td>
+        <td>57</td>
+        <td>33</td>
+        <td>42.11%</td>
+      </tr>
+      <tr>
+        <td>David dobrik</td>
+        <td>52</td>
+        <td>36</td>
+        <td>30.77%</td>
+      </tr>
+      <tr>
+        <td>bohemian rhapsody</td>
+        <td>108</td>
+        <td>51</td>
+        <td>52.78%</td>
+      </tr>
+      <tr>
+        <td>squeeze</td>
+        <td>28</td>
+        <td>21</td>
+        <td>25.00%</td>
+      </tr>
+      <tr>
+        <td>lady gaga</td>
+        <td>44</td>
+        <td>27</td>
+        <td>38.64%</td>
+      </tr>
+      <tr>
+        <td>aaj tak live</td>
+        <td>43</td>
+        <td>36</td>
+        <td>16.28%</td>
+      </tr>
+      <tr>
+        <td>5-minute crafts</td>
+        <td>56</td>
+        <td>45</td>
+        <td>19.64%</td>
+      </tr>
+      <tr>
+        <td>cardi b</td>
+        <td>29</td>
+        <td>21</td>
+        <td>27.59%</td>
+      </tr>
+      <tr>
+        <td>geo news live</td>
+        <td>54</td>
+        <td>39</td>
+        <td>27.78%</td>
+      </tr>
+      <tr>
+        <td>Selena Gomez</td>
+        <td>62</td>
+        <td>36</td>
+        <td>41.94%</td>
+      </tr>
+      <tr>
+        <td>Coldplay</td>
+        <td>50</td>
+        <td>24</td>
+        <td>52.00%</td>
+      </tr>
+      <tr>
+        <td>dantdm</td>
+        <td>27</td>
+        <td>18</td>
+        <td>33.33%</td>
+      </tr>
+      <tr>
+        <td>lofi</td>
+        <td>24</td>
+        <td>12</td>
+        <td>50.00%</td>
+      </tr>
+      <tr>
+        <td>anuel aa</td>
+        <td>35</td>
+        <td>24</td>
+        <td>31.43%</td>
+      </tr>
+      <tr>
+        <td>Rihanna</td>
+        <td>35</td>
+        <td>21</td>
+        <td>40.00%</td>
+      </tr>
+      <tr>
+        <td>drake</td>
+        <td>26</td>
+        <td>15</td>
+        <td>42.31%</td>
+      </tr>
+      <tr>
+        <td>dross</td>
+        <td>22</td>
+        <td>15</td>
+        <td>31.82%</td>
+      </tr>
+      <tr>
+        <td>Los polinesios</td>
+        <td>70</td>
+        <td>42</td>
+        <td>40.00%</td>
+      </tr>
+      <tr>
+        <td>rap</td>
+        <td>21</td>
+        <td>9</td>
+        <td>57.14%</td>
+      </tr>
+      <tr>
+        <td>Shawn Mendes</td>
+        <td>48</td>
+        <td>36</td>
+        <td>25.00%</td>
+      </tr>
+      <tr>
+        <td>cocomelon</td>
+        <td>59</td>
+        <td>27</td>
+        <td>54.24%</td>
+      </tr>
+      <tr>
+        <td>sia</td>
+        <td>19</td>
+        <td>9</td>
+        <td>52.63%</td>
+      </tr>
+      <tr>
+        <td>song</td>
+        <td>20</td>
+        <td>12</td>
+        <td>40.00%</td>
+      </tr>
+      <tr>
+        <td>slime</td>
+        <td>24</td>
+        <td>15</td>
+        <td>37.50%</td>
+      </tr>
+      <tr>
+        <td>dua lipa</td>
+        <td>43</td>
+        <td>24</td>
+        <td>44.19%</td>
+      </tr>
+      <tr>
+        <td>con Calma</td>
+        <td>48</td>
+        <td>27</td>
+        <td>43.75%</td>
+      </tr>
+      <tr>
+        <td>funny videos</td>
+        <td>54</td>
+        <td>36</td>
+        <td>33.33%</td>
+      </tr>
+      <tr>
+        <td>mikecrack</td>
+        <td>44</td>
+        <td>27</td>
+        <td>38.64%</td>
+      </tr>
+      <tr>
+        <td>vegetta777</td>
+        <td>38</td>
+        <td>30</td>
+        <td>21.05%</td>
+      </tr>
+      <tr>
+        <td>pubg</td>
+        <td>22</td>
+        <td>12</td>
+        <td>45.45%</td>
+      </tr>
+      <tr>
+        <td>avengers endgame</td>
+        <td>66</td>
+        <td>48</td>
+        <td>27.27%</td>
+      </tr>
+      <tr>
+        <td>movies</td>
+        <td>37</td>
+        <td>18</td>
+        <td>51.35%</td>
+      </tr>
+      <tr>
+        <td>soolking</td>
+        <td>26</td>
+        <td>24</td>
+        <td>7.69%</td>
+      </tr>
+      <tr>
+        <td>believer</td>
+        <td>38</td>
+        <td>24</td>
+        <td>36.84%</td>
+      </tr>
+      <tr>
+        <td>GTA 5</td>
+        <td>20</td>
+        <td>15</td>
+        <td>25.00%</td>
+      </tr>
+      <tr>
+        <td>Romeo Santos</td>
+        <td>66</td>
+        <td>36</td>
+        <td>45.45%</td>
+      </tr>
+      <tr>
+        <td>Katy perry</td>
+        <td>43</td>
+        <td>30</td>
+        <td>30.23%</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<p>The code used for these calculations can be found <a href="https://github.com/vetrivln/tv-keyboard-optimization">here</a>.</p>
+
+
+  </div>
+
+  
+
+    
+
+
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+        
+        
+  
+
+  
+    
+      
+    
+  
+
+  
+    
+      
+    
+  
+
+  
+    
+      
+    
+  
+
+  
+    
+      
+    
+  
+
+
+
+
+
+
+<section class="also-read">
+  <h2>Also Read:</h2>
+  <ul>
+    
+      <li><a href="/2026/03/19/xteink-x4-tamil/">Tamil support for the Xteink X4 reader</a></li>
+    
+      <li><a href="/2026/03/18/another-emacs/">Will there be another Emacs?</a></li>
+    
+      <li><a href="/2026/03/18/representing-money/">Representing Money in Writing</a></li>
+    
+  </ul>
+</section>
+
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; <a rel="license" href="https://creativecommons.org/licenses/by-nd/4.0/">CC BY-ND 4.0</a><br />
+~vetrivln
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
